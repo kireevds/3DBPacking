@@ -57,11 +57,15 @@ void MainWindow::on_mExit_triggered()
 
 void MainWindow::on_mDataLoad_triggered()
 {
-    on_mDataClear_triggered();
     QString fileName = QFileDialog::getOpenFileName(this,
                                                     tr("Выберите файл с данными"),
                                                     QDir::currentPath(),
                                                     tr("Data Files (*.txt *.csv)"));
+
+    if(fileName == "")
+        return;
+
+    on_mDataClear_triggered();
     QFile file (fileName);
     if (!file.open(QIODevice::ReadOnly))
     {
@@ -165,6 +169,7 @@ void MainWindow::on_mDataLoad_triggered()
 
     }
 
+    file.close();
 }
 
 void MainWindow::on_mDataSave_triggered()
