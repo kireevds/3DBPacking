@@ -24,6 +24,8 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_newContainerButton_clicked()
 {
+    if(ui->typeBox->currentIndex()!= 0 && ui->containersTable->rowCount()!=0) //Проверка типа задачи
+        return;
     ui->containersTable->insertRow(ui->containersTable->rowCount());
 }
 
@@ -177,6 +179,8 @@ void MainWindow::on_mDataLoad_triggered()
     }
 
     file.close();
+
+    checkTypeIndex();
 }
 
 void MainWindow::on_mDataSave_triggered()
@@ -224,3 +228,54 @@ void MainWindow::on_mDataSave_triggered()
     file.close();
 }
 
+
+void MainWindow::on_typeBox_currentIndexChanged(int index)
+{
+    Q_UNUSED (index);
+    checkTypeIndex();
+}
+
+void MainWindow::checkTypeIndex()
+{
+    int index = ui->typeBox->currentIndex();
+
+    switch(index)
+    {
+    case 0:
+        ui->containersTable->showColumn(1);
+        ui->containersTable->showColumn(2);
+        ui->containersTable->showColumn(3);
+        ui->containersTable->showColumn(4);
+        break;
+
+    case 1:
+        ui->containersTable->setRowCount(1);
+        ui->containersTable->showColumn(1);
+        ui->containersTable->showColumn(2);
+        ui->containersTable->showColumn(3);
+        ui->containersTable->hideColumn(4);
+        break;
+
+    case 2:
+        ui->containersTable->setRowCount(1);
+        ui->containersTable->showColumn(1);
+        ui->containersTable->hideColumn(2);
+        ui->containersTable->showColumn(3);
+        ui->containersTable->hideColumn(4);
+        break;
+
+    case 3:
+        ui->containersTable->setRowCount(1);
+        ui->containersTable->hideColumn(1);
+        ui->containersTable->hideColumn(2);
+        ui->containersTable->hideColumn(3);
+        ui->containersTable->hideColumn(4);
+        break;
+    }
+}
+
+void MainWindow::on_packButton_clicked()
+{
+    ui->objectsTable->sortByColumn(1, Qt::AscendingOrder);
+    ui->objectsTable->sortItems(1, Qt::AscendingOrder);
+}

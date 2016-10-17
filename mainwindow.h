@@ -37,8 +37,13 @@ private slots:
 
     void on_mDataSave_triggered(); //Меню - Сохранить данные
 
+    void on_typeBox_currentIndexChanged(int index);
+
+    void on_packButton_clicked();
+
 private:
     Ui::MainWindow *ui;
+    void checkTypeIndex();
 };
 
 #endif // MAINWINDOW_H
