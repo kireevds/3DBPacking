@@ -274,8 +274,172 @@ void MainWindow::checkTypeIndex()
     }
 }
 
+void MainWindow::createContainersList()
+{
+    int typeoftask = ui->typeBox->currentIndex();
+    containers = new QList<Container*>;
+
+    for (int i = 0; i < ui->containersTable->rowCount(); i++)
+    {
+        QString type = ui->containersTable->item(i,0)->data(Qt::EditRole).toString();
+        int width = ui->containersTable->item(i,1)->data(Qt::EditRole).toInt();
+        int length = ui->containersTable->item(i,2)->data(Qt::EditRole).toInt();
+        int height = ui->containersTable->item(i,3)->data(Qt::EditRole).toInt();
+        int count = ui->containersTable->item(i,4)->data(Qt::EditRole).toInt();
+
+        switch(typeoftask)
+        {
+        case 0:
+        {
+            for (int c = 0; c < count; c++)
+            {
+                Container* newcontainer = new Container (type, width, length, height);
+                containers->append(newcontainer);
+            }
+            break;
+        }
+
+        case 1:
+        {
+            Container* newcontainer = new Container (type, width, length, height);
+            containers->append(newcontainer);
+            break;
+        }
+
+        case 2:
+        {
+            Container* newcontainer = new Container (type, width, height);
+            containers->append(newcontainer);
+            break;
+        }
+
+        case 3:
+        {
+            Container* newcontainer = new Container (type);
+            containers->append(newcontainer);
+            break;
+        }
+        }
+    }
+}
+
+void MainWindow::createObjectsList()
+{
+    int objectrule = ui->objectsRuleBox->currentIndex();
+    objects = new QList<Object*>;
+    for (int i=0; i<ui->objectsTable->rowCount(); i++)
+    {
+        QString type = ui->objectsTable->item(i,0)->data(Qt::EditRole).toString();
+        int width = ui->objectsTable->item(i,1)->data(Qt::EditRole).toInt();
+        int length = ui->objectsTable->item(i,2)->data(Qt::EditRole).toInt();
+        int height = ui->objectsTable->item(i,3)->data(Qt::EditRole).toInt();
+        int count = ui->objectsTable->item(i,4)->data(Qt::EditRole).toInt();
+
+        switch(objectrule)
+        {
+        case 0: //0 или 1
+        case 1:
+        {
+            for (int c = 0; c < count; c++)
+            {
+                Object* newobject = new Object (type, width, length, height, width*length*height);
+                objects->append(newobject);
+            }
+            break;
+        }
+
+        case 2:
+        {
+            for (int c = 0; c < count; c++)
+            {
+                Object* newobject = new Object (type, width, length, height, 0);
+                objects->append(newobject);
+            }
+            break;
+        }
+
+        case 3:
+        case 4:
+        {
+            for (int c = 0; c < count; c++)
+            {
+                Object* newobject = new Object (type, width, length, height, width*length);
+                objects->append(newobject);
+            }
+            break;
+        }
+        }
+    }
+}
+
+
+void MainWindow::sortObjectsList()
+{
+    int objectrule = ui->objectsRuleBox->currentIndex();
+    switch(objectrule)
+    {
+    case 0:
+        std::sort(objects->begin(), objects->end(), &SortingAlg::maxToLowV);
+        break;
+    case 1:
+        std::sort(objects->begin(), objects->end(), &SortingAlg::lowToMaxV);
+        break;
+
+    case 2:
+    {
+        int direction = ui->directionBox->currentIndex();
+        switch (direction)                                      //в зависимости от направления загрузки
+        {
+        case 0:
+            std::sort(objects->begin(), objects->end(), &SortingAlg::maxToLowXYZ);
+            break;
+        case 1:
+            std::sort(objects->begin(), objects->end(), &SortingAlg::maxToLowXZY);
+            break;
+        case 2:
+            std::sort(objects->begin(), objects->end(), &SortingAlg::maxToLowYXZ);
+            break;
+        case 3:
+            std::sort(objects->begin(), objects->end(), &SortingAlg::maxToLowYZX);
+            break;
+        case 4:
+            std::sort(objects->begin(), objects->end(), &SortingAlg::maxToLowZXY);
+            break;
+        case 5:
+            std::sort(objects->begin(), objects->end(), &SortingAlg::maxToLowZYX);
+            break;
+        }
+    }
+        break;
+
+    case 3:
+        std::sort(objects->begin(), objects->end(), &SortingAlg::maxW1W2minW3);
+        break;
+    case 4:
+        std::sort(objects->begin(), objects->end(), &SortingAlg::minW1W2maxW3);
+        break;
+    }
+}
+
+
+
+
 void MainWindow::on_packButton_clicked()
 {
-    ui->objectsTable->sortByColumn(1, Qt::AscendingOrder);
-    ui->objectsTable->sortItems(1, Qt::AscendingOrder);
+    createContainersList();
+    createObjectsList();
+    sortObjectsList();
+
+
+
+    for (int i = 0; i < objects->size(); i++)
+        QMessageBox::information(this, "Внимание!", objects->at(i)->type);
+
+
 }
+
+
+
+//    QMessageBox::information(this, "Внимание!", QString::number(objects->count()));
+//ui->objectsTable->sortByColumn(1, Qt::AscendingOrder);
+//ui->objectsTable->sortItems(1, Qt::AscendingOrder); //Вроде как без разницы?

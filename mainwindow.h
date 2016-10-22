@@ -7,6 +7,9 @@
 #include <QMessageBox>
 #include <QStringList>
 #include <QTextStream>
+#include <container.h>
+#include <object.h>
+#include <sortingalg.h>
 
 namespace Ui {
 class MainWindow;
@@ -37,13 +40,18 @@ private slots:
 
     void on_mDataSave_triggered(); //Меню - Сохранить данные
 
-    void on_typeBox_currentIndexChanged(int index);
+    void on_typeBox_currentIndexChanged(int index); //смена типа задачи
 
-    void on_packButton_clicked();
+    void on_packButton_clicked(); //главная функция
 
 private:
     Ui::MainWindow *ui;
-    void checkTypeIndex();
+    void checkTypeIndex(); //показать колонки таблицы в зависимости от типа задачи
+    QList<Container*>* containers;
+    void createContainersList(); //создание списка контейнеров по табличным данным
+    QList<Object*>* objects;
+    void createObjectsList(); //создание списка объектов по табличным данным
+    void sortObjectsList(); //сортировка списка объектов по условию правила выбора
 };
 
 #endif // MAINWINDOW_H
