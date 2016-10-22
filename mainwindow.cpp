@@ -439,7 +439,7 @@ void MainWindow::on_packButton_clicked()
 }
 
 
-
+//
 //    QMessageBox::information(this, "Внимание!", QString::number(objects->count()));
 //ui->objectsTable->sortByColumn(1, Qt::AscendingOrder);
 //ui->objectsTable->sortItems(1, Qt::AscendingOrder); //Вроде как без разницы?
