@@ -52,6 +52,8 @@ private:
     QList<Object*>* objects;
     void createObjectsList(); //создание списка объектов по табличным данным
     void sortObjectsList(); //сортировка списка объектов по условию правила выбора
+    void locate(); //выбор функции размещения объекты
+    void locateInManyContainers();
 };
 
 #endif // MAINWINDOW_H

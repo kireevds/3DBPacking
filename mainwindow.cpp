@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include <QtDebug>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -277,6 +278,8 @@ void MainWindow::checkTypeIndex()
 void MainWindow::createContainersList()
 {
     int typeoftask = ui->typeBox->currentIndex();
+    int dir = ui->directionBox->currentIndex();
+    int pcr = ui->pkRuleBox->currentIndex();
     containers = new QList<Container*>;
 
     for (int i = 0; i < ui->containersTable->rowCount(); i++)
@@ -293,7 +296,7 @@ void MainWindow::createContainersList()
         {
             for (int c = 0; c < count; c++)
             {
-                Container* newcontainer = new Container (type, width, length, height);
+                Container* newcontainer = new Container (type, width, length, height, dir, pcr);
                 containers->append(newcontainer);
             }
             break;
@@ -301,21 +304,21 @@ void MainWindow::createContainersList()
 
         case 1:
         {
-            Container* newcontainer = new Container (type, width, length, height);
+            Container* newcontainer = new Container (type, width, length, height, dir, pcr);
             containers->append(newcontainer);
             break;
         }
 
         case 2:
         {
-            Container* newcontainer = new Container (type, width, height);
+            Container* newcontainer = new Container (type, width, height, dir, pcr);
             containers->append(newcontainer);
             break;
         }
 
         case 3:
         {
-            Container* newcontainer = new Container (type);
+            Container* newcontainer = new Container (type, dir, pcr);
             containers->append(newcontainer);
             break;
         }
@@ -421,20 +424,53 @@ void MainWindow::sortObjectsList()
     }
 }
 
+void MainWindow::locate()
+{
+    int typeoftask = ui->typeBox->currentIndex();
+    switch(typeoftask)
+    {
+    case 0:
+        locateInManyContainers();
+        break;
 
+    case 1:
+        break;
 
+    case 2:
+        break;
+
+    case 3:
+        break;
+    }
+}
+
+void MainWindow::locateInManyContainers()
+{
+    QMutableListIterator<Object*> it(*objects);
+    while (it.hasNext()) //Перебор сортированного списка объектов
+    {
+        Object* obj = it.next();
+        QMutableListIterator<Container*> itc(*containers);
+        while (itc.hasNext()) //Перебор списка контейнеров
+        {
+            Container* con = itc.next();
+            if (con->locateObject(obj)) //Если объект размещён, выход из обхода контейнеров
+            {
+                it.remove();
+                break;
+            }
+        }
+    }
+}
 
 void MainWindow::on_packButton_clicked()
 {
+    qDebug()<<"start ";
     createContainersList();
     createObjectsList();
     sortObjectsList();
-
-
-
-    for (int i = 0; i < objects->size(); i++)
-        QMessageBox::information(this, "Внимание!", objects->at(i)->type);
-
+    locate();
+    qDebug()<<"end";
 
 }
 

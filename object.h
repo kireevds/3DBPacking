@@ -17,8 +17,14 @@ public:
     int z;
 
     int result; //переменная для сортировки
+    bool flag; //Флаг на вложенность ПК
+
+    QString wx; //Для сортировки ПК (5 и 6)
+    QString wy;
+    QString wz;
 
     Object();
+    Object(const Object &obj); //Конструктор копирования
     Object(QString t, int w, int l, int h, int r);
 };
 
