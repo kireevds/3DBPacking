@@ -7,9 +7,11 @@
 #include <QMessageBox>
 #include <QStringList>
 #include <QTextStream>
+#include <QElapsedTimer>
 #include <container.h>
 #include <object.h>
 #include <sortingalg.h>
+#include <result.h>
 
 namespace Ui {
 class MainWindow;
@@ -22,6 +24,9 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
+
+signals:
+    void sendData(QList<Container*>* c, QList<Object*>* o, qint64 t); //Передача данных в форму с результатом
 
 private slots:
     void on_newContainerButton_clicked(); //Добавить строку под контейнер
@@ -45,7 +50,9 @@ private slots:
     void on_packButton_clicked(); //главная функция
 
 private:
+    Result* resultform;
     Ui::MainWindow *ui;
+    qint64 time; //Время заполнения
     void checkTypeIndex(); //показать колонки таблицы в зависимости от типа задачи
     QList<Container*>* containers;
     void createContainersList(); //создание списка контейнеров по табличным данным

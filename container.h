@@ -28,6 +28,7 @@ public:
     Container(QString t, int w, int l, int h, int dir, int pcr);
     Container(QString t, int w, int h, int dir, int pcr);
     Container(QString t, int dir, int pcr);
+    Container(const Container &cont);
 
     bool locateObject(Object *obj); //Разместить объект
     void checkinside(); //Проверить ПК на вложенность

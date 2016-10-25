@@ -16,11 +16,17 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     container.cpp \
     object.cpp \
-    sortingalg.cpp
+    sortingalg.cpp \
+    result.cpp \
+    continfo.cpp
 
 HEADERS  += mainwindow.h \
     container.h \
     object.h \
-    sortingalg.h
+    sortingalg.h \
+    result.h \
+    continfo.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    result.ui \
+    continfo.ui

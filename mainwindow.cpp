@@ -189,7 +189,7 @@ void MainWindow::on_mDataSave_triggered()
     QString fileName = QFileDialog::getSaveFileName(this,
                                                     tr("Сохранить данные в файл .csv"),
                                                     QDir::currentPath(),
-                                                    tr("Address Book (*.csv)"));
+                                                    tr("Save file (*.csv)"));
     if (fileName.isEmpty())
     {
         QMessageBox::information(this, "Внимание!", "Имя файла не выбрано");
@@ -469,7 +469,17 @@ void MainWindow::on_packButton_clicked()
     createContainersList();
     createObjectsList();
     sortObjectsList();
+    QElapsedTimer timer;
+    timer.start();
     locate();
+    time = timer.nsecsElapsed();
+
+    resultform = new Result; //Создание окна с результатами
+    connect(this, SIGNAL(sendData(QList<Container*>*, QList<Object*>*, qint64)), resultform, SLOT(recieveData(QList<Container*>*, QList<Object*>*, qint64))); // подключение сигнала к слоту нашей формы
+    resultform->show();
+    emit sendData(containers, objects, time);
+
+
     qDebug()<<"end";
 
 }

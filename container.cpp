@@ -29,7 +29,6 @@ Container::Container(QString t, int w, int l, int h, int dir, int pcr)
     myPotCons->append(newPotCon);
 }
 
-
 Container::Container(QString t, int w, int h, int dir, int pcr)
 {
     type = t;
@@ -48,6 +47,18 @@ Container::Container(QString t, int dir, int pcr)
     height = 0;
     direction = dir;
     PotConRule = pcr;
+}
+
+Container::Container(const Container &cont)
+{
+    type = cont.type;
+    width = cont.width;
+    length = cont.length;
+    height = cont.height;
+    direction = cont.direction;
+    PotConRule = cont.PotConRule;
+    myPotCons = cont.myPotCons;
+    myobjects = cont.myobjects;
 }
 
 void Container::createmyPotConsList()
