@@ -56,6 +56,11 @@
           <string>Первый с min w1*w2 и max w3</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>Первый из списка (без сортировки)</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item row="4" column="0">
@@ -94,12 +99,17 @@
         </item>
         <item>
          <property name="text">
-          <string>ПК с min неотрицательным значением pw1 - w1</string>
+          <string>ПК с min неотрицательным значением pw1 - w1, pw2 - w2, pw3 - w3</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>ПК с max значением pw3 - w3</string>
+          <string>ПК с max значением pw3 - w3, pw2 - w2, pw1 - w1</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Первый из списка (без сортировки)</string>
          </property>
         </item>
        </widget>

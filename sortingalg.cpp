@@ -135,15 +135,6 @@ bool SortingAlg::minW1W2maxW3(const Object *lhs, const Object *rhs)
     return lhs->height > rhs->height;
 }
 
-bool SortingAlg::maxPw_w(const Object *lhs, const Object *rhs)
-{
-    if ((lhs->height - lhs->wz.toInt()) != (rhs->height - rhs->wz.toInt()))
-        return (lhs->height - lhs->wz.toInt()) > (rhs->height - rhs->wz.toInt());
-    if ((lhs->length - lhs->wy.toInt()) != (rhs->length - rhs->wy.toInt()))
-        return (lhs->length - lhs->wy.toInt()) > (rhs->length - rhs->wy.toInt());
-    return (lhs->width - lhs->wx.toInt()) > (rhs->width - rhs->wx.toInt());
-}
-
 bool SortingAlg::minPw_w(const Object *lhs, const Object *rhs)
 {
     if ((lhs->width - lhs->wx.toInt()) != (rhs->width - rhs->wx.toInt()))
@@ -151,4 +142,13 @@ bool SortingAlg::minPw_w(const Object *lhs, const Object *rhs)
     if ((lhs->length - lhs->wy.toInt()) != (rhs->length - rhs->wy.toInt()))
         return (lhs->length - lhs->wy.toInt()) < (rhs->length - rhs->wy.toInt());
     return (lhs->height - lhs->wz.toInt()) < (rhs->height - rhs->wz.toInt());
+}
+
+bool SortingAlg::maxPw_w(const Object *lhs, const Object *rhs)
+{
+    if ((lhs->height - lhs->wz.toInt()) != (rhs->height - rhs->wz.toInt()))
+        return (lhs->height - lhs->wz.toInt()) > (rhs->height - rhs->wz.toInt());
+    if ((lhs->length - lhs->wy.toInt()) != (rhs->length - rhs->wy.toInt()))
+        return (lhs->length - lhs->wy.toInt()) > (rhs->length - rhs->wy.toInt());
+    return (lhs->width - lhs->wx.toInt()) > (rhs->width - rhs->wx.toInt());
 }

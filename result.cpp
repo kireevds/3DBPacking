@@ -19,7 +19,7 @@ Result::~Result()
     delete ui;
 }
 
-void Result::recieveData(QList<Container*>* c, QList<Object*>* o, qint64 t)
+void Result::recieveData(QList<Container*>* c, QList<Object*>* o, qint64 t) //Разобраться, почему вызывается n++ раз!!!!!!!!!!
 {
     contCount = 0;
     contNotCount = 0;

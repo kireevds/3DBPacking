@@ -7,15 +7,12 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    ui->containersTable->setRowCount(1);
     ui->containersTable->setColumnCount(5);
-    ui->containersTable->setHorizontalHeaderLabels(QStringList() << "Тип" << "Ширина" << "Длина" <<
-                                                   "Высота" << "Количество");
-
-    ui->objectsTable->setRowCount(1);
     ui->objectsTable->setColumnCount(5);
-    ui->objectsTable->setHorizontalHeaderLabels(QStringList() << "Тип" << "Ширина" << "Длина" <<
-                                                "Высота" << "Количество");
+    on_mDataClear_triggered();
+
+    ui->objectsRuleBox->setCurrentIndex(5);
+    ui->pkRuleBox->setCurrentIndex(7);
 }
 
 MainWindow::~MainWindow()
@@ -27,7 +24,15 @@ void MainWindow::on_newContainerButton_clicked()
 {
     if(ui->typeBox->currentIndex()!= 0 && ui->containersTable->rowCount()!=0) //Проверка типа задачи
         return;
-    ui->containersTable->insertRow(ui->containersTable->rowCount());
+    int tempRow = ui->containersTable->currentRow()+1;
+    ui->containersTable->insertRow(tempRow); //Добавить строку (контейнер) ниже выбранной, с ячейками данных типа int
+    for (int i = 1; i<5; i++)
+    {
+        QTableWidgetItem *item = new QTableWidgetItem;
+        int value = 0;
+        item->setData(Qt::EditRole, value);
+        ui->containersTable->setItem(tempRow,i, item);
+    }
 }
 
 void MainWindow::on_deleteContainerButton_clicked()
@@ -37,7 +42,15 @@ void MainWindow::on_deleteContainerButton_clicked()
 
 void MainWindow::on_newObjectButton_clicked()
 {
-    ui->objectsTable->insertRow(ui->objectsTable->rowCount());
+    int tempRow = ui->objectsTable->currentRow()+1;
+    ui->objectsTable->insertRow(tempRow); //Добавить строку (объект) ниже выбранной, с ячейками данных типа int
+    for (int i = 1; i<5; i++)
+    {
+        QTableWidgetItem *item = new QTableWidgetItem;
+        int value = 0;
+        item->setData(Qt::EditRole, value);
+        ui->objectsTable->setItem(tempRow,i, item);
+    }
 }
 
 void MainWindow::on_deleteObjectButton_clicked()
@@ -48,11 +61,11 @@ void MainWindow::on_deleteObjectButton_clicked()
 void MainWindow::on_mDataClear_triggered()
 {
     ui->containersTable->clear();
-    ui->containersTable->setRowCount(1);
+    on_newContainerButton_clicked();
     ui->containersTable->setHorizontalHeaderLabels(QStringList() << "Тип" << "Ширина" << "Длина" <<
                                                    "Высота" << "Количество");
     ui->objectsTable->clear();
-    ui->objectsTable->setRowCount(1);
+    on_newObjectButton_clicked();
     ui->objectsTable->setHorizontalHeaderLabels(QStringList() << "Тип" << "Ширина" << "Длина" <<
                                                 "Высота" << "Количество");
 }
@@ -232,7 +245,7 @@ void MainWindow::on_mDataSave_triggered()
 
 void MainWindow::on_typeBox_currentIndexChanged(int index)
 {
-    Q_UNUSED (index);
+    Q_UNUSED (index); //Неиспользуемый параметр
     checkTypeIndex();
 }
 
@@ -352,6 +365,7 @@ void MainWindow::createObjectsList()
         }
 
         case 2:
+        case 5:
         {
             for (int c = 0; c < count; c++)
             {
@@ -421,6 +435,8 @@ void MainWindow::sortObjectsList()
     case 4:
         std::sort(objects->begin(), objects->end(), &SortingAlg::minW1W2maxW3);
         break;
+    case 5:
+        break;
     }
 }
 
@@ -465,12 +481,41 @@ void MainWindow::locateInManyContainers()
 
 void MainWindow::on_packButton_clicked()
 {
+    if (ui->containersTable->rowCount() == 0 || ui->objectsTable->rowCount() == 0)       //проверка недопустимых значений
+        return;
+
+    for (int k = 1; k < 5; k++)
+    {
+        for (int i = 0; i < ui->containersTable->rowCount(); i++)
+        {
+            QTableWidgetItem* item = ui->containersTable->item(i,k);
+            if (!ui->containersTable->item(i,0) || ui->containersTable->item(i,0)->text().isEmpty()
+                    || item->data(Qt::EditRole).toInt() <= 0)
+            {
+                QMessageBox::information(this, "Внимание!", "Проверьте значения контейнеров!");
+                return;
+            }
+        }
+        for (int j = 0; j < ui->objectsTable->rowCount(); j++)
+        {
+            QTableWidgetItem* item = ui->objectsTable->item(j,k);
+            if (!ui->objectsTable->item(j,0) || ui->objectsTable->item(j,0)->text().isEmpty()
+                    || item->data(Qt::EditRole).toInt() <= 0)
+            {
+                QMessageBox::information(this, "Внимание!", "Проверьте значения объектов!");
+                return;
+            }
+        }
+    }
+
+
     qDebug()<<"start ";
     createContainersList();
     createObjectsList();
-    sortObjectsList();
+
     QElapsedTimer timer;
     timer.start();
+    sortObjectsList();
     locate();
     time = timer.nsecsElapsed();
 

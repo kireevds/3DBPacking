@@ -71,9 +71,9 @@ void Container::createmyPotConsList()
     int z = myobjects->last()->z;
 
     int end = myPotCons->size();
-    for (int i = 0; i < end; i++) //Перекрытие объекта и ПК - создание нового ПК
+    for (int i = 0; i < end; i++) //Перекрытие объекта и ПК -> создание новых ПК
     {
-        Object* tempPotCon = new Object(*myPotCons->takeFirst());
+        Object* tempPotCon = new Object(*myPotCons->takeFirst()); //Старый ПК удаляется из списка и помещается во временную переменную для проверки перекрытия с объектом
         int px = tempPotCon->width;
         int py = tempPotCon->length;
         int pz = tempPotCon->height;
@@ -81,78 +81,61 @@ void Container::createmyPotConsList()
         int yk = tempPotCon->y;
         int zk = tempPotCon->z;
 
-        if (x>xk && x<(xk+px))
-        {
-            Object * newPotCon = new Object(*tempPotCon);
-            newPotCon->width = x+xk;
-            myPotCons->append(newPotCon);
-        }
-
-        if ((x+wx)>xk && (x+wx)<(xk+px))
-        {
-            Object * newPotCon = new Object(*tempPotCon);
-            newPotCon->width = xk+px-x-wx;
-            newPotCon->x = x+wx;
-            myPotCons->append(newPotCon);
-        }
-
-        if ((x<=xk || x>=(xk+px)) && ((x+wx)<=xk || (x+wx)>=(xk+px)) && wx!=px) //Объект и ПК не пересекаются по x
+        if ((x+wx)<=xk || x>=(xk+px) || (y+wy)<=yk || y>=(yk+py) || (z+wz)<=zk || z>=(zk+pz)) //ПК и объект не пересекаются
         {
             Object * newPotCon = new Object(*tempPotCon);
             myPotCons->append(newPotCon);
         }
-
-
-        if (y>yk && y<(yk+py))
+        else
         {
-            Object * newPotCon = new Object(*tempPotCon);
-            newPotCon->length = y+yk;
-            myPotCons->append(newPotCon);
-        }
+            if (x>xk)
+            {
+                Object * newPotCon = new Object(*tempPotCon);
+                newPotCon->width = x-xk;
+                myPotCons->append(newPotCon);
+            }
 
-        if ((y+wy)>yk && (y+wy)<(yk+py))
-        {
-            Object * newPotCon = new Object(*tempPotCon);
-            newPotCon->length = yk+py-y-wy;
-            newPotCon->y = y+wy;
-            myPotCons->append(newPotCon);
-        }
+            if (y>yk)
+            {
+                Object * newPotCon = new Object(*tempPotCon);
+                newPotCon->length = y-yk;
+                myPotCons->append(newPotCon);
+            }
 
-        if ((y<=yk || y>=(yk+py)) && ((y+wy)<=yk || (y+wy)>=(yk+py)) && wy!=py) //Объект и ПК не пересекаются по y
-        {
-            Object * newPotCon = new Object(*tempPotCon);
-            myPotCons->append(newPotCon);
-        }
+            if (z>zk)
+            {
+                Object * newPotCon = new Object(*tempPotCon);
+                newPotCon->height = z-zk;
+                myPotCons->append(newPotCon);
+            }
 
+            if ((x+wx)<(xk+px))
+            {
+                Object * newPotCon = new Object(*tempPotCon);
+                newPotCon->x = x+wx;
+                newPotCon->width = xk+px-x-wx;
+                myPotCons->append(newPotCon);
+            }
 
-        if (z>zk && z<(zk+pz))
-        {
-            Object * newPotCon = new Object(*tempPotCon);
-            newPotCon->height = z+zk;
-            myPotCons->append(newPotCon);
-        }
+            if ((y+wy)<(yk+py))
+            {
+                Object * newPotCon = new Object(*tempPotCon);
+                newPotCon->y = y+wy;
+                newPotCon->length = yk+py-y-wy;
+                myPotCons->append(newPotCon);
+            }
 
-        if ((z+wz)>zk && (z+wz)<(zk+pz))
-        {
-            Object * newPotCon = new Object(*tempPotCon);
-            newPotCon->height = zk+pz-z-wz;
-            newPotCon->z = z+wz;
-            myPotCons->append(newPotCon);
-        }
-
-        if ((z<=zk || z>=(zk+pz)) && ((z+wz)<=zk || (z+wz)>=(zk+pz)) && wz!=pz) //Объект и ПК не пересекаются по z
-        {
-            Object * newPotCon = new Object(*tempPotCon);
-            myPotCons->append(newPotCon);
+            if ((z+wz)<(zk+pz))
+            {
+                Object * newPotCon = new Object(*tempPotCon);
+                newPotCon->z = z+wz;
+                newPotCon->height = zk+pz-z-wz;
+                myPotCons->append(newPotCon);
+            }
         }
     }
 
     checkinside();
-
-//    qDebug()<<"o"<<myobjects->size();
-//    qDebug()<<"pk"<<myPotCons->size();
-//    qDebug()<<"obj"<<obj->x<<obj->y<<obj->z<<obj->height<<obj->length<<obj->width;
-//    qDebug()<<"pk"<<PotCon->x<<PotCon->y<<PotCon->z<<PotCon->height<<PotCon->length<<PotCon->width;
 }
 
 void Container::checkinside()
@@ -187,7 +170,7 @@ void Container::checkinside()
 //    while (it3.hasNext())
 //    {
 //        Object* PotCon = it3.next();
-//        qDebug()<<"pk"<<PotCon->x<<PotCon->y<<PotCon->z<<" "<<PotCon->width<<PotCon->length<<PotCon->height;
+//        qDebug()<<"pk koordinati: ("<<PotCon->x<<"; "<<PotCon->y<<"; "<<PotCon->z<<") razmeri: ["<<PotCon->width<<"; "<<PotCon->length<<"; "<<PotCon->height<<"]";
 //    }
 
 }
@@ -273,6 +256,9 @@ void Container::sortPotCon(Object *obj)
         }
         std::sort(myPotCons->begin(), myPotCons->end(), &SortingAlg::maxPw_w);
         break;
+
+    case 7:
+        break;
     }
 }
 
@@ -290,7 +276,7 @@ bool Container::locateObject(Object* obj)
             obj->z = PotCon->z;
             myobjects->append(obj);
             createmyPotConsList();
-            return true;
+            return true; //Объект размещён
         }
     }
     return false; //Объект не размещён
