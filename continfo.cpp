@@ -27,7 +27,7 @@ void ContInfo::recieveData2(QList<Object *> *objL)
     ui->horizontalSlider->setSingleStep(1);
     ui->horizontalSlider->setValue(0);
 
-    int ccont = objects->size()-1;
+    int ccont = 0;
     QListIterator<Object*> ito(*objects);
     while (ito.hasNext())
     {
@@ -74,7 +74,7 @@ void ContInfo::recieveData2(QList<Object *> *objL)
         item7->setData(Qt::EditRole, value7);
         ui->tableWidget->setItem(ccont,6, item7);
 
-        ccont = ccont - 1;
+        ccont = ccont + 1;
     }
 }
 

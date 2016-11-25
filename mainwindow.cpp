@@ -85,6 +85,9 @@ void MainWindow::on_mDataLoad_triggered()
     if(fileName.isEmpty())
         return;
 
+    QFileInfo fi(fileName);
+    fileN = fi.fileName();
+
     on_mDataClear_triggered();
     QFile file (fileName);
     if (!file.open(QIODevice::ReadOnly))
@@ -520,9 +523,18 @@ void MainWindow::on_packButton_clicked()
     time = timer.nsecsElapsed();
 
     resultform = new Result; //Создание окна с результатами
-    connect(this, SIGNAL(sendData(QList<Container*>*, QList<Object*>*, qint64)), resultform, SLOT(recieveData(QList<Container*>*, QList<Object*>*, qint64))); // подключение сигнала к слоту нашей формы
+    connect(this, SIGNAL(sendData(QList<Container*>*, QList<Object*>*, qint64, QString, QString, QString, QString, QString, QString)),
+            resultform, SLOT(recieveData(QList<Container*>*, QList<Object*>*, qint64, QString, QString, QString, QString, QString, QString))); // подключение сигнала к слоту нашей формы
     resultform->show();
-    emit sendData(containers, objects, time);
+
+    QString spinS;
+    if(ui->spinStatus->checkState() == 0)
+        spinS = "Нет";
+    else
+        spinS = "Да";
+
+    emit sendData(containers, objects, time, fileN, ui->typeBox->currentText(), ui->directionBox->currentText(),
+                  ui->objectsRuleBox->currentText(), ui->pkRuleBox->currentText(), spinS);
 
 
     qDebug()<<"end";

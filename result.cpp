@@ -1,5 +1,6 @@
 #include "result.h"
 #include "ui_result.h"
+#include <qtextcodec.h>
 
 Result::Result(QWidget *parent) :
     QWidget(parent),
@@ -9,6 +10,7 @@ Result::Result(QWidget *parent) :
     ui->setupUi(this);
     ui->tableWidget->setColumnCount(4);
     ui->tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
+//    ui->tableWidget->setSortingEnabled(true); //неправильно работает: при переключении таблиц теряются столбцы
 
     connect(ui->showObjListButton, SIGNAL(clicked()), contInformation, SLOT(show()));
     connect(this, SIGNAL(sendData2(QList<Object*>*)), contInformation, SLOT(recieveData2(QList<Object*>*)));
@@ -19,8 +21,9 @@ Result::~Result()
     delete ui;
 }
 
-void Result::recieveData(QList<Container*>* c, QList<Object*>* o, qint64 t) //Разобраться, почему вызывается n++ раз!!!!!!!!!!
+void Result::recieveData(QList<Container*>* c, QList<Object*>* o, qint64 t, QString f, QString type, QString dir, QString objrule, QString pkrule, QString spin)         //Разобраться, почему вызывается n++ раз!!!!!!!!!!
 {
+//    qDebug()<<"recieved";
     contCount = 0;
     contNotCount = 0;
     objCount = 0;
@@ -33,6 +36,15 @@ void Result::recieveData(QList<Container*>* c, QList<Object*>* o, qint64 t) //Р
     objects = o;
     objNotCount = objects->size();
     time = t;
+    fileN = f;
+    fileNT = fileN;
+    fileNT.chop(4);
+    typeBox = type;
+    direction = dir;
+    objRule = objrule;
+    PKRule = pkrule;
+    spinStatus = spin;
+
     QString stime = QString::number(time);
     stime.chop(3);
     ui->timeCount->setText(stime + " мкс");
@@ -104,7 +116,7 @@ void Result::on_objShowButton_clicked()
     ui->tableWidget->clear();
     ui->tableWidget->setHorizontalHeaderLabels(QStringList() << "Тип" << "Ширина" << "Длина" << "Высота");
     ui->tableWidget->setRowCount(objCount);
-    int ccont = objCount-1;                                     //Таблица заполняется снизу!!!!!!!!!!Переделать
+    int ccont = 0;
     QListIterator<Container*> it(*containers);
     while (it.hasNext())
     {
@@ -139,7 +151,7 @@ void Result::on_objShowButton_clicked()
                 item4->setData(Qt::EditRole, value4);
                 ui->tableWidget->setItem(ccont,3, item4);
 
-                ccont = ccont - 1;
+                ccont = ccont + 1;
             }
         }
     }
@@ -159,7 +171,7 @@ void Result::on_objNotShowButton_clicked()
     ui->tableWidget->clear();
     ui->tableWidget->setHorizontalHeaderLabels(QStringList() << "Тип" << "Ширина" << "Длина" << "Высота");
     ui->tableWidget->setRowCount(objNotCount);
-    int ccont = objNotCount-1;
+    int ccont = 0;
     QListIterator<Object*> ito(*objects);
     while (ito.hasNext())
     {
@@ -188,7 +200,7 @@ void Result::on_objNotShowButton_clicked()
         item4->setData(Qt::EditRole, value4);
         ui->tableWidget->setItem(ccont,3, item4);
 
-        ccont = ccont - 1;
+        ccont = ccont + 1;
     }
 }
 
@@ -206,7 +218,7 @@ void Result::on_contShowButton_clicked()
     ui->tableWidget->clear();
     ui->tableWidget->setHorizontalHeaderLabels(QStringList() << "Тип" << "Ширина" << "Длина" << "Высота");
     ui->tableWidget->setRowCount(contCount);
-    int ccont = contCount-1;                                     //Таблица заполняется снизу!!!!!!!!!!Переделать
+    int ccont = 0;
     QListIterator<Container*> it(*containers);
     while (it.hasNext())
     {
@@ -237,7 +249,7 @@ void Result::on_contShowButton_clicked()
             item4->setData(Qt::EditRole, value4);
             ui->tableWidget->setItem(ccont,3, item4);
 
-            ccont = ccont - 1;
+            ccont = ccont + 1;
         }
     }
 }
@@ -256,7 +268,7 @@ void Result::on_contNotShowButton_clicked()
     ui->tableWidget->clear();
     ui->tableWidget->setHorizontalHeaderLabels(QStringList() << "Тип" << "Ширина" << "Длина" << "Высота");
     ui->tableWidget->setRowCount(contNotCount);
-    int ccont = contNotCount-1;
+    int ccont = 0;
     QListIterator<Container*> it(*containers);
     while (it.hasNext())
     {
@@ -287,7 +299,7 @@ void Result::on_contNotShowButton_clicked()
             item4->setData(Qt::EditRole, value4);
             ui->tableWidget->setItem(ccont,3, item4);
 
-            ccont = ccont - 1;
+            ccont = ccont + 1;
         }
     }
 }
@@ -340,8 +352,8 @@ void Result::on_showObjListButton_clicked()
 void Result::on_saveResultButton_clicked()
 {
     QString fileName = QFileDialog::getSaveFileName(this,
-                                                    tr("Сохранить данные в файл .csv"),
-                                                    QDir::currentPath(),
+                                                    tr("Сохранить результат в файл .csv"),
+                                                    fileNT + "-результат",
                                                     tr("Save file (*.csv)"));
     if (fileName.isEmpty())
     {
@@ -358,9 +370,83 @@ void Result::on_saveResultButton_clicked()
     }
 
     QTextStream out(&file);
-    out << "Результат упаковки объектов в контейнер"<<endl;
 
-                                                                                          // Дописать функцию, найти причину проблемы с кодировкой
+//    Для записи текста в кодировке, открывающейся в excel, раскомментировать 2 строчки
+    QTextCodec *codec = QTextCodec::codecForName("cp1251");
+    out.setCodec(codec);
+
+    out << QString("Результат упаковки по данным из файла")<<";"<<fileN<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
+    out << QString("Тип решаемой задачи")<<";"<<typeBox<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
+    out << QString("Направление загрузки контейнера")<<";"<<direction<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
+    out << QString("Правило выбора объектов")<<";"<<objRule<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
+    out << QString("Правило выбора ПК")<<";"<<PKRule<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
+    out << QString("Возможность вращения объектов")<<";"<<spinStatus<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
+    out <<"- - - - -;- - - - -;- - - - -;- - - - -;- - - - -;- - - - -;- - - - -;"<<endl;
+    out << QString("Количество размещенных объектов")<<";"<<objCount<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
+    out << QString("Количество неразмещенных объектов")<<";"<<objNotCount<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
+    out << QString("Количество заполненных контейнеров")<<";"<<contCount<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
+    out << QString("Количество незаполненных контейнеров")<<";"<<contNotCount<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
+    out << QString("Средняя заполняемость контейнеров")<<";"<<QString(generateOccupation(avgOccup))<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
+    out << QString("Максимальная заполняемость контейнеров")<<";"<<QString(generateOccupation(maxOccup))<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
+    out << QString("Минимальная заполняемость контейнеров")<<";"<<QString(generateOccupation(minOccup))<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
+    QString stime = QString::number(time);
+    stime.chop(3);
+    out << QString("Общее время размещения объектов")<<";"<<stime<<QString(" мкс")<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
+    out <<";"<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
+    out <<"- - - - -;- - - - -;- - - - -;- - - - -;- - - - -;- - - - -;- - - - -;"<<endl;
+    out <<";"<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
+    if (objNotCount != 0)
+    {
+        out << QString("Список неразмещенных объектов")<<";"<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
+        out << ";"<<QString("Тип")<<";"<<QString("Ширина")<<";"<<QString("Длина")<<";"<<QString("Высота")<<";"<<";"<<";"<<endl;
+        QListIterator<Object*> ito(*objects);
+        int countobj = 1;
+        while (ito.hasNext())
+        {
+            Object* tempObject = ito.next();
+            out <<QString("№")<<QString::number(countobj)<<";"<<QString(tempObject->type)<<";"<<QString::number(tempObject->width)<<";"<<QString::number(tempObject->length)<<";"<<QString::number(tempObject->height)<<";"<<";"<<";"<<endl;
+            countobj = countobj + 1;
+        }
+        out <<";"<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
+        out <<"- - - - - -;- - - - - -;- - - - - -;- - - - - -;- - - - - -;- - - - - -;- - - - - -;"<<endl;
+        out <<";"<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
+    }
+
+    for (int i=0; i<fullContainers->size(); i++)
+    {
+        out << QString("КОНТЕЙНЕР №")<<QString::number(i+1)<<";"<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
+        out << QString("Тип контейнера")<<";"<<QString(fullContainers->at(i)->type)<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
+        QString size = QString::number(fullContainers->at(i)->width);
+        size.append(" * ");
+        size.append(QString::number(fullContainers->at(i)->length));
+        size.append(" * ");
+        size.append(QString::number(fullContainers->at(i)->height));
+        out << QString("Размеры контейнера")<<";"<<QString(size)<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
+        int contVol = fullContainers->at(i)->width * fullContainers->at(i)->length * fullContainers->at(i)->height;
+        out << QString("Объём контейнера")<<";"<<QString::number(contVol)<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
+        out << QString("Количество упакованных объектов в контейнере")<<";"<<QString::number(fullContainers->at(i)->myobjects->size())<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
+        int objVol=0;
+        for(int index=0; index<fullContainers->at(i)->myobjects->size(); index++)
+        {
+            objVol = objVol + fullContainers->at(i)->myobjects->at(index)->width * fullContainers->at(i)->myobjects->at(index)->length * fullContainers->at(i)->myobjects->at(index)->height;
+        }
+        out << QString("Объём упакованных объектов")<<";"<<QString::number(objVol)<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
+        float objVolF = (float)objVol / contVol;
+        out << QString("Заполняемость контейнера")<<";"<<QString(generateOccupation(objVolF))<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
+        out << QString("Список размещённых объектов в контейнере")<<";"<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
+        out << ";"<<QString("Тип")<<";"<<QString("X")<<";"<<QString("Y")<<";"<<QString("Z")<<";"<<QString("Ширина")<<";"<<QString("Длина")<<";"<<QString("Высота")<<endl;
+        QListIterator<Object*> ito(*fullContainers->at(i)->myobjects);
+        int countobj = 1;
+        while (ito.hasNext())
+        {
+            Object* tempObject = ito.next();
+            out <<QString("№")<<QString::number(countobj)<<";"<<QString(tempObject->type)<<";"<<QString::number(tempObject->x)<<";"<<QString::number(tempObject->y)<<";"<<QString::number(tempObject->z)
+               <<";"<<QString::number(tempObject->width)<<";"<<QString::number(tempObject->length)<<";"<<QString::number(tempObject->height)<<endl;
+            countobj = countobj + 1;
+        }
+        out <<";"<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
+        out <<";"<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
+    }
 
     file.close();
 }

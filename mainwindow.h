@@ -26,7 +26,7 @@ public:
     ~MainWindow();
 
 signals:
-    void sendData(QList<Container*>* c, QList<Object*>* o, qint64 t); //Передача данных в форму с результатом
+    void sendData(QList<Container*>* c, QList<Object*>* o, qint64 t, QString f, QString type, QString dir, QString objrule, QString pkrule, QString spin); //Передача данных в форму с результатом
 
 private slots:
     void on_newContainerButton_clicked(); //Добавить строку под контейнер
@@ -53,6 +53,8 @@ private:
     Result* resultform;
     Ui::MainWindow *ui;
     qint64 time; //Время заполнения
+    QString fileN; //имя файла с исходными данными
+
     void checkTypeIndex(); //показать колонки таблицы в зависимости от типа задачи
     QList<Container*>* containers;
     void createContainersList(); //создание списка контейнеров по табличным данным

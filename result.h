@@ -29,7 +29,7 @@ signals:
 
 
 public slots:
-    void recieveData(QList<Container*>* c, QList<Object *>* o, qint64 t);
+    void recieveData(QList<Container*>* c, QList<Object *>* o, qint64 t, QString f, QString type, QString dir, QString objrule, QString pkrule, QString spin);
 
 private slots:
     void on_objShowButton_clicked();
@@ -55,10 +55,18 @@ private:
 
     QString generateOccupation(float occup); //Подсчёт процентов заполнения
     qint64 time; //Время заполнения
+    QString fileN; //Имя файла с исходными данными
+    QString fileNT; //Имя файла без расширения с исходными данными
+    QString typeBox; //Тип задачи
+    QString direction; //Направление загрузки
+    QString objRule; //Правило выбора объектов
+    QString PKRule; //Правило выбора ПК
+    QString spinStatus; //Возможность вращения
+
     int contCount; //Количество заполненных контейнеров
     int contNotCount; //Количество незаполненных контейнеров
-    int objCount; //Количество заполненных объектов
-    int objNotCount; //Количество незаполненных объектов
+    int objCount; //Количество размещенных объектов
+    int objNotCount; //Количество неразмещенных объектов
     float avgOccup; //Средняя заполняемость контейнеров
     float minOccup; //Минимальная заполняемость контейнеров
     float maxOccup; //Максимальная заполняемость контейнеров
