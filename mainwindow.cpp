@@ -579,6 +579,7 @@ void MainWindow::on_mTesting_triggered()
         QMessageBox msgBox;
         msgBox.setText("Ошибка в пути к директории с файлами!");
         msgBox.exec();
+        return;
     }
 
     QDir currentDir = QDir(sourceDir);
@@ -629,4 +630,8 @@ void MainWindow::on_mTesting_triggered()
            }
        }
    }
+
+   QMessageBox msgBox;
+   msgBox.setText("Отчёты созданы!");
+   msgBox.exec();
 }

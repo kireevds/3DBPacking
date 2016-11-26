@@ -395,8 +395,8 @@ void Result::on_saveResultButton_clicked()
     QTextStream out(&file);
 
 //--------  Для записи текста в кодировке, открывающейся в excel, раскомментировать 2 строчки
-//    QTextCodec *codec = QTextCodec::codecForName("cp1251");
-//    out.setCodec(codec);
+    QTextCodec *codec = QTextCodec::codecForName("cp1251");
+    out.setCodec(codec);
 //--------
 
     out << QString("Результат упаковки по данным из файла")<<";"<<fileN<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
