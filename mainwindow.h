@@ -11,7 +11,7 @@
 #include <container.h>
 #include <object.h>
 #include <sortingalg.h>
-#include <result.h>
+#include <resultwindow.h>
 #include <QFileInfoList>
 #include <QDir>
 
@@ -54,7 +54,7 @@ private slots:
     void on_mTesting_triggered(); //Массовая упаковка - тестирование
 
 private:
-    Result* resultform;
+    Resultwindow* resultform;
     Ui::MainWindow *ui;
     qint64 time; //Время заполнения
     QString fileN; //имя файла с исходными данными

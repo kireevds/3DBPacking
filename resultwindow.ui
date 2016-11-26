@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Result</class>
- <widget class="QWidget" name="Result">
+ <class>Resultwindow</class>
+ <widget class="QDialog" name="Resultwindow">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,8 +11,83 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Результат упаковки</string>
+   <string>Dialog</string>
   </property>
+  <widget class="QPushButton" name="showObjListButton">
+   <property name="geometry">
+    <rect>
+     <x>510</x>
+     <y>570</y>
+     <width>371</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Показать список упакованных в контейнер объектов</string>
+   </property>
+  </widget>
+  <widget class="QWidget" name="layoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>310</y>
+     <width>911</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <item>
+     <widget class="QLabel" name="label_10">
+      <property name="text">
+       <string>Выберите заполненный контейнер для просмотра:</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QComboBox" name="comboBox">
+      <property name="focusPolicy">
+       <enum>Qt::StrongFocus</enum>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="pwidget" native="true">
+   <property name="geometry">
+    <rect>
+     <x>50</x>
+     <y>360</y>
+     <width>321</width>
+     <height>271</height>
+    </rect>
+   </property>
+   <widget class="QLabel" name="label_16">
+    <property name="geometry">
+     <rect>
+      <x>140</x>
+      <y>120</y>
+      <width>59</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>&lt;pic&gt;</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="Line" name="line">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>300</y>
+     <width>471</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+  </widget>
   <widget class="QWidget" name="horizontalLayoutWidget">
    <property name="geometry">
     <rect>
@@ -212,42 +287,6 @@
     </item>
    </layout>
   </widget>
-  <widget class="Line" name="line">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>300</y>
-     <width>471</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="orientation">
-    <enum>Qt::Horizontal</enum>
-   </property>
-  </widget>
-  <widget class="QWidget" name="pwidget" native="true">
-   <property name="geometry">
-    <rect>
-     <x>50</x>
-     <y>360</y>
-     <width>321</width>
-     <height>271</height>
-    </rect>
-   </property>
-   <widget class="QLabel" name="label_16">
-    <property name="geometry">
-     <rect>
-      <x>140</x>
-      <y>120</y>
-      <width>59</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>&lt;pic&gt;</string>
-    </property>
-   </widget>
-  </widget>
   <widget class="QWidget" name="gridLayoutWidget_2">
    <property name="geometry">
     <rect>
@@ -344,19 +383,6 @@
     </item>
    </layout>
   </widget>
-  <widget class="QPushButton" name="showObjListButton">
-   <property name="geometry">
-    <rect>
-     <x>510</x>
-     <y>570</y>
-     <width>371</width>
-     <height>32</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Показать список упакованных в контейнер объектов</string>
-   </property>
-  </widget>
   <widget class="QPushButton" name="saveResultButton">
    <property name="geometry">
     <rect>
@@ -370,31 +396,18 @@
     <string>Сохранить результаты упаковки</string>
    </property>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QPushButton" name="closeButton">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>310</y>
-     <width>911</width>
-     <height>41</height>
+     <x>400</x>
+     <y>571</y>
+     <width>113</width>
+     <height>71</height>
     </rect>
    </property>
-   <layout class="QHBoxLayout" name="horizontalLayout_2">
-    <item>
-     <widget class="QLabel" name="label_10">
-      <property name="text">
-       <string>Выберите заполненный контейнер для просмотра:</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QComboBox" name="comboBox">
-      <property name="focusPolicy">
-       <enum>Qt::StrongFocus</enum>
-      </property>
-     </widget>
-    </item>
-   </layout>
+   <property name="text">
+    <string>Закрыть</string>
+   </property>
   </widget>
  </widget>
  <resources/>

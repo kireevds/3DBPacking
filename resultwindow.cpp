@@ -1,29 +1,29 @@
-#include "result.h"
-#include "ui_result.h"
+#include "resultwindow.h"
+#include "ui_resultwindow.h"
 #include <qtextcodec.h>
 
-Result::Result(QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::Result)
+Resultwindow::Resultwindow(QWidget *parent) :
+    QDialog(parent),
+    ui(new Ui::Resultwindow)
 {
-    contInformation = new ContInfo;
+    contInformation = new Continfowindow;
     ui->setupUi(this);
     ui->tableWidget->setColumnCount(4);
     ui->tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
 //    ui->tableWidget->setSortingEnabled(true); //неправильно работает: при переключении таблиц теряются столбцы
 
-    connect(ui->showObjListButton, SIGNAL(clicked()), contInformation, SLOT(show()));
+    connect(ui->showObjListButton, SIGNAL(clicked()), contInformation, SLOT(exec()));
     connect(this, SIGNAL(sendData2(QList<Object*>*)), contInformation, SLOT(recieveData2(QList<Object*>*)));
 }
 
-Result::~Result()
+Resultwindow::~Resultwindow()
 {
     delete ui;
 }
 
-void Result::recieveData(QList<Container*>* c, QList<Object*>* o, qint64 t, QString f, QString type, QString dir, QString objrule, QString pkrule, QString spin, bool tes, int nap, int objr, int pkr, QString rd)
+void Resultwindow::recieveData(QList<Container*>* c, QList<Object*>* o, qint64 t, QString f, QString type, QString dir, QString objrule, QString pkrule, QString spin, bool tes, int nap, int objr, int pkr, QString rd)
 {
-    qDebug()<<"recieved";
+    qDebug()<<"recieved "<<nap<<" "<<objr<<" "<<pkr;
     contCount = 0;
     contNotCount = 0;
     objCount = 0;
@@ -108,10 +108,13 @@ void Result::recieveData(QList<Container*>* c, QList<Object*>* o, qint64 t, QStr
     }
 
     if(testing)
+    {
         on_saveResultButton_clicked();
+        this->done(1);
+    }
 }
 
-void Result::on_objShowButton_clicked()
+void Resultwindow::on_objShowButton_clicked()
 {
     ui->objShowButton->setEnabled(false);
     ui->objNotShowButton->setEnabled(true);
@@ -166,7 +169,7 @@ void Result::on_objShowButton_clicked()
     }
 }
 
-void Result::on_objNotShowButton_clicked()
+void Resultwindow::on_objNotShowButton_clicked()
 {
     ui->objShowButton->setEnabled(true);
     ui->objNotShowButton->setEnabled(false);
@@ -213,7 +216,7 @@ void Result::on_objNotShowButton_clicked()
     }
 }
 
-void Result::on_contShowButton_clicked()
+void Resultwindow::on_contShowButton_clicked()
 {
     ui->objShowButton->setEnabled(true);
     ui->objNotShowButton->setEnabled(true);
@@ -263,7 +266,7 @@ void Result::on_contShowButton_clicked()
     }
 }
 
-void Result::on_contNotShowButton_clicked()
+void Resultwindow::on_contNotShowButton_clicked()
 {
     ui->objShowButton->setEnabled(true);
     ui->objNotShowButton->setEnabled(true);
@@ -313,7 +316,7 @@ void Result::on_contNotShowButton_clicked()
     }
 }
 
-QString Result::generateOccupation(float occup)
+QString Resultwindow::generateOccupation(float occup)
 {
     QString SOccup = QString::number(occup);
     if(SOccup.left(1) == "1")
@@ -329,7 +332,7 @@ QString Result::generateOccupation(float occup)
     return SOccup;
 }
 
-void Result::on_comboBox_currentIndexChanged(int index)
+void Resultwindow::on_comboBox_currentIndexChanged(int index)
 {
     ui->contType->setText(fullContainers->at(index)->type);
     QString size = QString::number(fullContainers->at(index)->width);
@@ -351,14 +354,14 @@ void Result::on_comboBox_currentIndexChanged(int index)
     ui->contOccup->setText(generateOccupation(objVolF));
 }
 
-void Result::on_showObjListButton_clicked()
+void Resultwindow::on_showObjListButton_clicked()
 {
     int i = ui->comboBox->currentIndex();
     QList<Object*>* objList = fullContainers->at(i)->myobjects;
     emit sendData2(objList);
 }
 
-void Result::on_saveResultButton_clicked()
+void Resultwindow::on_saveResultButton_clicked()
 {
     QString fileName;
 
@@ -470,7 +473,10 @@ void Result::on_saveResultButton_clicked()
 
     file.close();
 
-    qDebug()<<"recorded";
-    if(testing)
-        this->close();
+    qDebug()<<"recorded "<<napr<<" "<<objru<<" "<<PKru<<testing;
+}
+
+void Resultwindow::on_closeButton_clicked()
+{
+    this->done(0);
 }

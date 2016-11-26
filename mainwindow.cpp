@@ -66,10 +66,12 @@ void MainWindow::on_deleteObjectButton_clicked()
 void MainWindow::on_mDataClear_triggered()
 {
     ui->containersTable->clear();
+    ui->containersTable->setRowCount(0);
     on_newContainerButton_clicked();
     ui->containersTable->setHorizontalHeaderLabels(QStringList() << "Тип" << "Ширина" << "Длина" <<
                                                    "Высота" << "Количество");
     ui->objectsTable->clear();
+    ui->objectsTable->setRowCount(0);
     on_newObjectButton_clicked();
     ui->objectsTable->setHorizontalHeaderLabels(QStringList() << "Тип" << "Ширина" << "Длина" <<
                                                 "Высота" << "Количество");
@@ -530,14 +532,13 @@ void MainWindow::on_packButton_clicked()
     locate();
     time = timer.nsecsElapsed();
 
-    resultform = new Result; //Создание окна с результатами
+    resultform = new Resultwindow; //Создание окна с результатами
     connect(this, SIGNAL(sendData(QList<Container*>*, QList<Object*>*, qint64, QString, QString, QString, QString, QString, QString,
                                   bool, int, int, int, QString)),
             resultform, SLOT(recieveData(QList<Container*>*, QList<Object*>*, qint64, QString, QString, QString, QString, QString, QString,
-                                         bool, int, int, int, QString))); // подключение сигнала к слоту нашей формы
+                                         bool, int, int, int, QString)), Qt::UniqueConnection); // подключение сигнала к слоту нашей формы
 
     resultform->setAttribute(Qt::WA_DeleteOnClose); //Удаляет виджет при закрытии. Без этого при новом открытии был +1 посланный сигнал (к старым закрытым виджетам)
-    resultform->show();
 
     QString spinS;
     if(ui->spinStatus->checkState() == 0)
@@ -549,8 +550,10 @@ void MainWindow::on_packButton_clicked()
                   ui->objectsRuleBox->currentText(), ui->pkRuleBox->currentText(), spinS,
                   testing, napr, objrule, PKrule, resDir);
 
-    qDebug()<<"end";
+    resultform->exec();
+    resultform->done(0);
 
+    qDebug()<<"end"<<endl;
 }
 
 

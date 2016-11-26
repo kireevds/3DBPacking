@@ -1,19 +1,19 @@
-#include "continfo.h"
-#include "ui_continfo.h"
+#include "continfowindow.h"
+#include "ui_continfowindow.h"
 
-ContInfo::ContInfo(QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::ContInfo)
+Continfowindow::Continfowindow(QWidget *parent) :
+    QDialog(parent),
+    ui(new Ui::Continfowindow)
 {
     ui->setupUi(this);
 }
 
-ContInfo::~ContInfo()
+Continfowindow::~Continfowindow()
 {
     delete ui;
 }
 
-void ContInfo::recieveData2(QList<Object *> *objL)
+void Continfowindow::recieveData2(QList<Object *> *objL)
 {
     objects = objL;
     ui->tableWidget->setColumnCount(7);
@@ -78,7 +78,7 @@ void ContInfo::recieveData2(QList<Object *> *objL)
     }
 }
 
-void ContInfo::on_upButton_clicked()
+void Continfowindow::on_upButton_clicked()
 {
     if (rowSC != 0)
         rowSC = rowSC - 1;
@@ -86,7 +86,7 @@ void ContInfo::on_upButton_clicked()
     ui->horizontalSlider->setValue(rowSC);
 }
 
-void ContInfo::on_downButton_clicked()
+void Continfowindow::on_downButton_clicked()
 {
     if (rowSC != ui->tableWidget->rowCount() -1)
         rowSC = rowSC + 1;
@@ -94,14 +94,14 @@ void ContInfo::on_downButton_clicked()
     ui->horizontalSlider->setValue(rowSC);
 }
 
-void ContInfo::on_tableWidget_cellClicked(int row, int column)
+void Continfowindow::on_tableWidget_cellClicked(int row, int column)
 {
     rowSC = row;
     Q_UNUSED (column);
     ui->horizontalSlider->setValue(rowSC);
 }
 
-void ContInfo::on_horizontalSlider_valueChanged(int value)
+void Continfowindow::on_horizontalSlider_valueChanged(int value)
 {
     rowSC = value;
     ui->tableWidget->selectRow(rowSC);

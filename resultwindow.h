@@ -1,7 +1,7 @@
-#ifndef RESULT_H
-#define RESULT_H
+#ifndef RESULTWINDOW_H
+#define RESULTWINDOW_H
 
-#include <QWidget>
+#include <QDialog>
 #include <QString>
 #include <QList>
 #include <QElapsedTimer>
@@ -10,19 +10,19 @@
 #include <QFileDialog>
 #include <container.h>
 #include <object.h>
-#include <continfo.h>
+#include <continfowindow.h>
 
 namespace Ui {
-class Result;
+class Resultwindow;
 }
 
-class Result : public QWidget
+class Resultwindow : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit Result(QWidget *parent = 0);
-    ~Result();
+    explicit Resultwindow(QWidget *parent = 0);
+    ~Resultwindow();
 
 signals:
     void sendData2(QList<Object*>* objL);
@@ -46,9 +46,11 @@ private slots:
 
     void on_saveResultButton_clicked();
 
+    void on_closeButton_clicked();
+
 private:
-    ContInfo* contInformation;
-    Ui::Result *ui;
+    Continfowindow* contInformation;
+    Ui::Resultwindow *ui;
     QList<Object*>* objects;
     QList<Container*>* containers;
     QList<Container*>* fullContainers;
@@ -78,4 +80,4 @@ private:
     QString resDir;
 };
 
-#endif // RESULT_H
+#endif // RESULTWINDOW_H

@@ -1,21 +1,21 @@
-#ifndef CONTINFO_H
-#define CONTINFO_H
+#ifndef CONTINFOWINDOW_H
+#define CONTINFOWINDOW_H
 
-#include <QWidget>
+#include <QDialog>
 #include <QString>
 #include <object.h>
 
 namespace Ui {
-class ContInfo;
+class Continfowindow;
 }
 
-class ContInfo : public QWidget
+class Continfowindow : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit ContInfo(QWidget *parent = 0);
-    ~ContInfo();
+    explicit Continfowindow(QWidget *parent = 0);
+    ~Continfowindow();
 
 public slots:
     void recieveData2(QList<Object*>* objL);
@@ -30,9 +30,9 @@ private slots:
     void on_horizontalSlider_valueChanged(int value);
 
 private:
-    Ui::ContInfo *ui;
+    Ui::Continfowindow *ui;
     QList<Object*>* objects;
     int rowSC; //Индекс выбранной строки в таблице
 };
 
-#endif // CONTINFO_H
+#endif // CONTINFOWINDOW_H
