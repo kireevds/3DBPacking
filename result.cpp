@@ -31,6 +31,7 @@ void Result::recieveData(QList<Container*>* c, QList<Object*>* o, qint64 t, QStr
     avgOccup = 0;
     minOccup = 1000;
     maxOccup = -1;
+    ui->comboBox->clear();
 
     testing = tes;
     napr = nap;
@@ -101,6 +102,7 @@ void Result::recieveData(QList<Container*>* c, QList<Object*>* o, qint64 t, QStr
     ui->objCount->setText(QString::number(objCount));
     ui->objNotCount->setText(QString::number(objNotCount));
     on_contShowButton_clicked();
+
 
     for(int i=0; i<fullContainers->size(); i++)
     {
@@ -331,6 +333,8 @@ QString Result::generateOccupation(float occup)
 
 void Result::on_comboBox_currentIndexChanged(int index)
 {
+    if(index == -1)
+        return;
     ui->contType->setText(fullContainers->at(index)->type);
     QString size = QString::number(fullContainers->at(index)->width);
     size.append(" * ");
@@ -391,8 +395,8 @@ void Result::on_saveResultButton_clicked()
     QTextStream out(&file);
 
 //--------  Для записи текста в кодировке, открывающейся в excel, раскомментировать 2 строчки
-    QTextCodec *codec = QTextCodec::codecForName("cp1251");
-    out.setCodec(codec);
+//    QTextCodec *codec = QTextCodec::codecForName("cp1251");
+//    out.setCodec(codec);
 //--------
 
     out << QString("Результат упаковки по данным из файла")<<";"<<fileN<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
@@ -415,22 +419,6 @@ void Result::on_saveResultButton_clicked()
     out <<";"<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
     out <<"- - - - -;- - - - -;- - - - -;- - - - -;- - - - -;- - - - -;- - - - -;"<<endl;
     out <<";"<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
-    if (objNotCount != 0)
-    {
-        out << QString("Список неразмещенных объектов")<<";"<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
-        out << ";"<<QString("Тип")<<";"<<QString("Ширина")<<";"<<QString("Длина")<<";"<<QString("Высота")<<";"<<";"<<";"<<endl;
-        QListIterator<Object*> ito(*objects);
-        int countobj = 1;
-        while (ito.hasNext())
-        {
-            Object* tempObject = ito.next();
-            out <<QString("№")<<QString::number(countobj)<<";"<<QString(tempObject->type)<<";"<<QString::number(tempObject->width)<<";"<<QString::number(tempObject->length)<<";"<<QString::number(tempObject->height)<<";"<<";"<<";"<<endl;
-            countobj = countobj + 1;
-        }
-        out <<";"<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
-        out <<"- - - - - -;- - - - - -;- - - - - -;- - - - - -;- - - - - -;- - - - - -;- - - - - -;"<<endl;
-        out <<";"<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
-    }
 
     for (int i=0; i<fullContainers->size(); i++)
     {
@@ -468,10 +456,23 @@ void Result::on_saveResultButton_clicked()
         out <<";"<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
     }
 
+    if (objNotCount != 0)
+    {
+        out <<"- - - - - -;- - - - - -;- - - - - -;- - - - - -;- - - - - -;- - - - - -;- - - - - -;"<<endl;
+        out <<";"<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
+        out << QString("Список неразмещенных объектов")<<";"<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
+        out << ";"<<QString("Тип")<<";"<<QString("Ширина")<<";"<<QString("Длина")<<";"<<QString("Высота")<<";"<<";"<<";"<<endl;
+        QListIterator<Object*> ito(*objects);
+        int countobj = 1;
+        while (ito.hasNext())
+        {
+            Object* tempObject = ito.next();
+            out <<QString("№")<<QString::number(countobj)<<";"<<QString(tempObject->type)<<";"<<QString::number(tempObject->width)<<";"<<QString::number(tempObject->length)<<";"<<QString::number(tempObject->height)<<";"<<";"<<";"<<endl;
+            countobj = countobj + 1;
+        }
+    }
+
     file.close();
 
-    qDebug()<<"recorded "<<napr<<" "<<objru<<" "<<PKru<<testing;
-
-    if(testing)
-        this->close();
+    qDebug()<<"recorded "<<napr<<" "<<objru<<" "<<PKru;
 }

@@ -7,7 +7,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     resultform = new Result; //Создание окна с результатами
-    resultform->setAttribute(Qt::WA_DeleteOnClose); //Удаляет виджет при закрытии. Без этого при новом открытии был +1 посланный сигнал (к старым закрытым виджетам)
+//    resultform->setAttribute(Qt::WA_DeleteOnClose); //Удаляет виджет при закрытии. Без этого при новом открытии был +1 посланный сигнал (к старым закрытым виджетам)
 
     ui->setupUi(this);
     ui->containersTable->setColumnCount(5);
@@ -553,7 +553,7 @@ void MainWindow::on_packButton_clicked()
                   ui->objectsRuleBox->currentText(), ui->pkRuleBox->currentText(), spinS,
                   testing, napr, objrule, PKrule, resDir);
 
-    qDebug()<<"end";
+    qDebug()<<"end"<<endl;
 
 }
 
@@ -600,7 +600,31 @@ void MainWindow::on_mTesting_triggered()
                for (PKrule = 0; PKrule < ui->pkRuleBox->count(); PKrule++)
                {
                    ui->pkRuleBox->setCurrentIndex(PKrule);
-                   on_packButton_clicked();
+
+                   qDebug()<<"begin ";
+
+                   createContainersList();
+                   createObjectsList();
+
+                   QElapsedTimer timer;
+                   timer.start();
+                   sortObjectsList();
+                   locate();
+                   time = timer.nsecsElapsed();
+
+//                   resultform->show(); //Показывать окно не нужно, так быстрее
+
+                   QString spinS;
+                   if(ui->spinStatus->checkState() == 0)
+                       spinS = "Нет";
+                   else
+                       spinS = "Да";
+
+                   emit sendData(containers, objects, time, fileN, ui->typeBox->currentText(), ui->directionBox->currentText(),
+                                 ui->objectsRuleBox->currentText(), ui->pkRuleBox->currentText(), spinS,
+                                 testing, napr, objrule, PKrule, resDir);
+
+                   qDebug()<<"end"<<endl;
                }
            }
        }
