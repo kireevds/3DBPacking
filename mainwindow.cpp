@@ -6,6 +6,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
+    resultform = new Resultwindow; //Создание окна с результатами
+
     ui->setupUi(this);
     ui->containersTable->setColumnCount(5);
     ui->objectsTable->setColumnCount(5);
@@ -18,6 +20,12 @@ MainWindow::MainWindow(QWidget *parent) :
     napr=-1;
     objrule=-1;
     PKrule=-1;
+
+    connect(this, SIGNAL(sendData(QList<Container*>*, QList<Object*>*, qint64, QString, QString, QString, QString, QString, QString,
+                                  bool, int, int, int, QString)),
+            resultform, SLOT(recieveData(QList<Container*>*, QList<Object*>*, qint64, QString, QString, QString, QString, QString, QString,
+                                         bool, int, int, int, QString)), Qt::UniqueConnection); // подключение сигнала к слоту нашей формы
+
 }
 
 MainWindow::~MainWindow()
@@ -532,14 +540,6 @@ void MainWindow::on_packButton_clicked()
     locate();
     time = timer.nsecsElapsed();
 
-    resultform = new Resultwindow; //Создание окна с результатами
-    connect(this, SIGNAL(sendData(QList<Container*>*, QList<Object*>*, qint64, QString, QString, QString, QString, QString, QString,
-                                  bool, int, int, int, QString)),
-            resultform, SLOT(recieveData(QList<Container*>*, QList<Object*>*, qint64, QString, QString, QString, QString, QString, QString,
-                                         bool, int, int, int, QString)), Qt::UniqueConnection); // подключение сигнала к слоту нашей формы
-
-    resultform->setAttribute(Qt::WA_DeleteOnClose); //Удаляет виджет при закрытии. Без этого при новом открытии был +1 посланный сигнал (к старым закрытым виджетам)
-
     QString spinS;
     if(ui->spinStatus->checkState() == 0)
         spinS = "Нет";
@@ -551,7 +551,6 @@ void MainWindow::on_packButton_clicked()
                   testing, napr, objrule, PKrule, resDir);
 
     resultform->exec();
-    resultform->done(0);
 
     qDebug()<<"end"<<endl;
 }
@@ -599,7 +598,30 @@ void MainWindow::on_mTesting_triggered()
                for (PKrule = 0; PKrule < ui->pkRuleBox->count(); PKrule++)
                {
                    ui->pkRuleBox->setCurrentIndex(PKrule);
-                   on_packButton_clicked();
+                   qDebug()<<"begin ";
+
+                   createContainersList();
+                   createObjectsList();
+
+                   QElapsedTimer timer;
+                   timer.start();
+                   sortObjectsList();
+                   locate();
+                   time = timer.nsecsElapsed();
+
+                   QString spinS;
+                   if(ui->spinStatus->checkState() == 0)
+                       spinS = "Нет";
+                   else
+                       spinS = "Да";
+
+                   emit sendData(containers, objects, time, fileN, ui->typeBox->currentText(), ui->directionBox->currentText(),
+                                 ui->objectsRuleBox->currentText(), ui->pkRuleBox->currentText(), spinS,
+                                 testing, napr, objrule, PKrule, resDir);
+
+                   resultform->exec();
+
+                   qDebug()<<"end"<<endl;
                }
            }
        }

@@ -109,6 +109,7 @@ void Resultwindow::recieveData(QList<Container*>* c, QList<Object*>* o, qint64 t
 
     if(testing)
     {
+        this->setFocus();
         on_saveResultButton_clicked();
         this->done(1);
     }
