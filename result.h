@@ -29,7 +29,7 @@ signals:
 
 
 public slots:
-    void recieveData(QList<Container*>* c, QList<Object *>* o, qint64 t, QString f, QString type, QString dir, QString objrule, QString pkrule, QString spin);
+    void recieveData(QList<Container*>* c, QList<Object *>* o, qint64 t, QString f, QString type, QString dir, QString objrule, QString pkrule, QString spin, bool tes, int nap, int objr, int pkr, QString rd);
 
 private slots:
     void on_objShowButton_clicked();
@@ -70,6 +70,12 @@ private:
     float avgOccup; //Средняя заполняемость контейнеров
     float minOccup; //Минимальная заполняемость контейнеров
     float maxOccup; //Максимальная заполняемость контейнеров
+
+    bool testing; //Для теста
+    int napr;
+    int objru;
+    int PKru;
+    QString resDir;
 };
 
 #endif // RESULT_H

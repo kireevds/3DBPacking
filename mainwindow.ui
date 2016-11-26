@@ -364,6 +364,7 @@
     </widget>
     <addaction name="mAbout"/>
     <addaction name="mData"/>
+    <addaction name="mTesting"/>
     <addaction name="mExit"/>
    </widget>
    <addaction name="menu3DBPacking"/>
@@ -391,6 +392,11 @@
   <action name="mDataClear">
    <property name="text">
     <string>Очистить</string>
+   </property>
+  </action>
+  <action name="mTesting">
+   <property name="text">
+    <string>Тестирование</string>
    </property>
   </action>
  </widget>

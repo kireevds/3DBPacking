@@ -21,9 +21,9 @@ Result::~Result()
     delete ui;
 }
 
-void Result::recieveData(QList<Container*>* c, QList<Object*>* o, qint64 t, QString f, QString type, QString dir, QString objrule, QString pkrule, QString spin)         //Разобраться, почему вызывается n++ раз!!!!!!!!!!
+void Result::recieveData(QList<Container*>* c, QList<Object*>* o, qint64 t, QString f, QString type, QString dir, QString objrule, QString pkrule, QString spin, bool tes, int nap, int objr, int pkr, QString rd)
 {
-//    qDebug()<<"recieved";
+    qDebug()<<"recieved";
     contCount = 0;
     contNotCount = 0;
     objCount = 0;
@@ -31,6 +31,12 @@ void Result::recieveData(QList<Container*>* c, QList<Object*>* o, qint64 t, QStr
     avgOccup = 0;
     minOccup = 1000;
     maxOccup = -1;
+
+    testing = tes;
+    napr = nap;
+    objru = objr;
+    PKru = pkr;
+    resDir = rd;
 
     containers = c;
     objects = o;
@@ -100,6 +106,9 @@ void Result::recieveData(QList<Container*>* c, QList<Object*>* o, qint64 t, QStr
     {
         ui->comboBox->addItem(QString::number(i+1));
     }
+
+    if(testing)
+        on_saveResultButton_clicked();
 }
 
 void Result::on_objShowButton_clicked()
@@ -351,10 +360,20 @@ void Result::on_showObjListButton_clicked()
 
 void Result::on_saveResultButton_clicked()
 {
-    QString fileName = QFileDialog::getSaveFileName(this,
+    QString fileName;
+
+    if(!testing)
+    {
+            fileName = QFileDialog::getSaveFileName(this,
                                                     tr("Сохранить результат в файл .csv"),
                                                     fileNT + "-результат",
                                                     tr("Save file (*.csv)"));
+    }
+    else
+    {
+        fileName = resDir+fileNT+"-результат-"+QString::number(napr)+"-"+QString::number(objru)+"-"+QString::number(PKru)+".csv";
+    }
+
     if (fileName.isEmpty())
     {
         QMessageBox::information(this, "Внимание!", "Имя файла не выбрано");
@@ -365,15 +384,16 @@ void Result::on_saveResultButton_clicked()
 
     if (!file.open(QIODevice::WriteOnly))
     {
-        QMessageBox::information(this, "Внимание!", "Ошибка создания файла");
+        QMessageBox::information(this, "Внимание!", "Ошибка создания файла"+fileName);
         return;
     }
 
     QTextStream out(&file);
 
-//    Для записи текста в кодировке, открывающейся в excel, раскомментировать 2 строчки
+//--------  Для записи текста в кодировке, открывающейся в excel, раскомментировать 2 строчки
     QTextCodec *codec = QTextCodec::codecForName("cp1251");
     out.setCodec(codec);
+//--------
 
     out << QString("Результат упаковки по данным из файла")<<";"<<fileN<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
     out << QString("Тип решаемой задачи")<<";"<<typeBox<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
@@ -449,4 +469,8 @@ void Result::on_saveResultButton_clicked()
     }
 
     file.close();
+
+    qDebug()<<"recorded";
+    if(testing)
+        this->close();
 }

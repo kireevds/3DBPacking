@@ -13,6 +13,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->objectsRuleBox->setCurrentIndex(5);
     ui->pkRuleBox->setCurrentIndex(7);
+
+    testing = false;
+    napr=-1;
+    objrule=-1;
+    PKrule=-1;
 }
 
 MainWindow::~MainWindow()
@@ -77,10 +82,13 @@ void MainWindow::on_mExit_triggered()
 
 void MainWindow::on_mDataLoad_triggered()
 {
-    QString fileName = QFileDialog::getOpenFileName(this,
-                                                    tr("Выберите файл с данными"),
-                                                    QDir::currentPath(),
-                                                    tr("Data Files (*.txt *.csv)"));
+    if (!testing)
+    {
+        fileName = QFileDialog::getOpenFileName(this,
+                                                        tr("Выберите файл с данными"),
+                                                        QDir::currentPath(),
+                                                        tr("Data Files (*.txt *.csv)"));
+    }
 
     if(fileName.isEmpty())
         return;
@@ -88,14 +96,14 @@ void MainWindow::on_mDataLoad_triggered()
     QFileInfo fi(fileName);
     fileN = fi.fileName();
 
-    on_mDataClear_triggered();
     QFile file (fileName);
     if (!file.open(QIODevice::ReadOnly))
     {
-        QMessageBox::information(this, "Внимание!", "Ошибка чтения файла " + fileName);
+        QMessageBox::information(this, "Внимание!", "Ошибка чтения файла " + fileN);
         return;
     }
 
+    on_mDataClear_triggered();
     bool isOld = false;
     if(fileName.right(4) == ".txt") //Совместимость со старым форматом
     {
@@ -511,8 +519,8 @@ void MainWindow::on_packButton_clicked()
         }
     }
 
+    qDebug()<<"begin ";
 
-    qDebug()<<"start ";
     createContainersList();
     createObjectsList();
 
@@ -523,8 +531,12 @@ void MainWindow::on_packButton_clicked()
     time = timer.nsecsElapsed();
 
     resultform = new Result; //Создание окна с результатами
-    connect(this, SIGNAL(sendData(QList<Container*>*, QList<Object*>*, qint64, QString, QString, QString, QString, QString, QString)),
-            resultform, SLOT(recieveData(QList<Container*>*, QList<Object*>*, qint64, QString, QString, QString, QString, QString, QString))); // подключение сигнала к слоту нашей формы
+    connect(this, SIGNAL(sendData(QList<Container*>*, QList<Object*>*, qint64, QString, QString, QString, QString, QString, QString,
+                                  bool, int, int, int, QString)),
+            resultform, SLOT(recieveData(QList<Container*>*, QList<Object*>*, qint64, QString, QString, QString, QString, QString, QString,
+                                         bool, int, int, int, QString))); // подключение сигнала к слоту нашей формы
+
+    resultform->setAttribute(Qt::WA_DeleteOnClose); //Удаляет виджет при закрытии. Без этого при новом открытии был +1 посланный сигнал (к старым закрытым виджетам)
     resultform->show();
 
     QString spinS;
@@ -534,8 +546,8 @@ void MainWindow::on_packButton_clicked()
         spinS = "Да";
 
     emit sendData(containers, objects, time, fileN, ui->typeBox->currentText(), ui->directionBox->currentText(),
-                  ui->objectsRuleBox->currentText(), ui->pkRuleBox->currentText(), spinS);
-
+                  ui->objectsRuleBox->currentText(), ui->pkRuleBox->currentText(), spinS,
+                  testing, napr, objrule, PKrule, resDir);
 
     qDebug()<<"end";
 
@@ -546,3 +558,47 @@ void MainWindow::on_packButton_clicked()
 //    QMessageBox::information(this, "Внимание!", QString::number(objects->count()));
 //ui->objectsTable->sortByColumn(1, Qt::AscendingOrder);
 //ui->objectsTable->sortItems(1, Qt::AscendingOrder); //Вроде как без разницы?
+
+void MainWindow::on_mTesting_triggered()
+{
+    testing = true;
+    //выбор директории с файлами - ресурсами
+    sourceDir = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
+                                                 "/Users/dima/Desktop",
+                                                 QFileDialog::ShowDirsOnly
+                                                 | QFileDialog::DontResolveSymlinks);
+    resDir = sourceDir;
+    resDir.append("/Result/");
+    QDir().mkpath(resDir);
+    if(sourceDir == "")
+    {
+        QMessageBox msgBox;
+        msgBox.setText("Ошибка в пути к директории с файлами!");
+        msgBox.exec();
+    }
+
+    QDir currentDir = QDir(sourceDir);
+    QString filename = "*";
+    sourceFiles = currentDir.entryInfoList(QStringList(filename),
+                                     QDir::Files | QDir::NoSymLinks);
+
+   for (int i = 0; i < sourceFiles.size(); ++i)
+   {
+       fileName = sourceFiles.at(i).absoluteFilePath();
+       on_mDataLoad_triggered();
+
+       for (napr = 0; napr<ui->directionBox->count(); napr++)
+       {
+           ui->directionBox->setCurrentIndex(napr);
+           for (objrule = 0; objrule < ui->objectsRuleBox->count(); objrule++)
+           {
+               ui->objectsRuleBox->setCurrentIndex(objrule);
+               for (PKrule = 0; PKrule < ui->pkRuleBox->count(); PKrule++)
+               {
+                   ui->pkRuleBox->setCurrentIndex(PKrule);
+                   on_packButton_clicked();
+               }
+           }
+       }
+   }
+}
