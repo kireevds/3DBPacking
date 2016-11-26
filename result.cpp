@@ -23,7 +23,7 @@ Result::~Result()
 
 void Result::recieveData(QList<Container*>* c, QList<Object*>* o, qint64 t, QString f, QString type, QString dir, QString objrule, QString pkrule, QString spin, bool tes, int nap, int objr, int pkr, QString rd)
 {
-    qDebug()<<"recieved";
+    qDebug()<<"recieved "<<nap<<" "<<objr<<" "<<pkr;
     contCount = 0;
     contNotCount = 0;
     objCount = 0;
@@ -470,7 +470,8 @@ void Result::on_saveResultButton_clicked()
 
     file.close();
 
-    qDebug()<<"recorded";
+    qDebug()<<"recorded "<<napr<<" "<<objru<<" "<<PKru<<testing;
+
     if(testing)
         this->close();
 }

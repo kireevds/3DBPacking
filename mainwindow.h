@@ -11,9 +11,9 @@
 #include <container.h>
 #include <object.h>
 #include <sortingalg.h>
-#include <result.h>
 #include <QFileInfoList>
 #include <QDir>
+#include <result.h>
 
 namespace Ui {
 class MainWindow;

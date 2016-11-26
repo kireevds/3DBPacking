@@ -6,6 +6,9 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
+    resultform = new Result; //Создание окна с результатами
+    resultform->setAttribute(Qt::WA_DeleteOnClose); //Удаляет виджет при закрытии. Без этого при новом открытии был +1 посланный сигнал (к старым закрытым виджетам)
+
     ui->setupUi(this);
     ui->containersTable->setColumnCount(5);
     ui->objectsTable->setColumnCount(5);
@@ -18,6 +21,12 @@ MainWindow::MainWindow(QWidget *parent) :
     napr=-1;
     objrule=-1;
     PKrule=-1;
+
+
+    connect(this, SIGNAL(sendData(QList<Container*>*, QList<Object*>*, qint64, QString, QString, QString, QString, QString, QString,
+                                  bool, int, int, int, QString)),
+            resultform, SLOT(recieveData(QList<Container*>*, QList<Object*>*, qint64, QString, QString, QString, QString, QString, QString,
+                                         bool, int, int, int, QString))); // подключение сигнала к слоту нашей формы
 }
 
 MainWindow::~MainWindow()
@@ -532,13 +541,6 @@ void MainWindow::on_packButton_clicked()
     locate();
     time = timer.nsecsElapsed();
 
-    resultform = new Result; //Создание окна с результатами
-    connect(this, SIGNAL(sendData(QList<Container*>*, QList<Object*>*, qint64, QString, QString, QString, QString, QString, QString,
-                                  bool, int, int, int, QString)),
-            resultform, SLOT(recieveData(QList<Container*>*, QList<Object*>*, qint64, QString, QString, QString, QString, QString, QString,
-                                         bool, int, int, int, QString))); // подключение сигнала к слоту нашей формы
-
-    resultform->setAttribute(Qt::WA_DeleteOnClose); //Удаляет виджет при закрытии. Без этого при новом открытии был +1 посланный сигнал (к старым закрытым виджетам)
     resultform->show();
 
     QString spinS;
