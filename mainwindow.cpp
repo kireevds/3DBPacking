@@ -66,10 +66,12 @@ void MainWindow::on_deleteObjectButton_clicked()
 void MainWindow::on_mDataClear_triggered()
 {
     ui->containersTable->clear();
+    ui->containersTable->setRowCount(0);
     on_newContainerButton_clicked();
     ui->containersTable->setHorizontalHeaderLabels(QStringList() << "Тип" << "Ширина" << "Длина" <<
                                                    "Высота" << "Количество");
     ui->objectsTable->clear();
+    ui->objectsTable->setRowCount(0);
     on_newObjectButton_clicked();
     ui->objectsTable->setHorizontalHeaderLabels(QStringList() << "Тип" << "Ширина" << "Длина" <<
                                                 "Высота" << "Количество");
