@@ -6,31 +6,38 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
-    resultform = new Result; //Создание окна с результатами
-//    resultform->setAttribute(Qt::WA_DeleteOnClose); //Удаляет виджет при закрытии. Без этого при новом открытии был +1 посланный сигнал (к старым закрытым виджетам)
+    resultform = new Result(); //Создание окна с результатами
+    containers = new QList<Container*>; //Создание списка контейнеров
+    objects = new QList<Object*>; //Создание списка объектов
+    dataS = new DataSend; //Создание структуры для передачи данных
 
     ui->setupUi(this);
+    ui->testingLable->hide();
     ui->containersTable->setColumnCount(5);
     ui->objectsTable->setColumnCount(5);
+    QSizePolicy sp_retain = ui->containersTable->sizePolicy(); //Сохранить занятым место скрытого виджета
+    sp_retain.setRetainSizeWhenHidden(true);
+    ui->containersTable->setSizePolicy(sp_retain);
+    QSizePolicy sp_retain2 = ui->objectsTable->sizePolicy();
+    sp_retain2.setRetainSizeWhenHidden(true);
+    ui->objectsTable->setSizePolicy(sp_retain2);
+
     on_mDataClear_triggered();
 
-    ui->objectsRuleBox->setCurrentIndex(5);
-    ui->pkRuleBox->setCurrentIndex(7);
-
     testing = false;
-    napr=-1;
-    objrule=-1;
-    PKrule=-1;
 
-
-    connect(this, SIGNAL(sendData(QList<Container*>*, QList<Object*>*, qint64, QString, QString, QString, QString, QString, QString,
-                                  bool, int, int, int, QString)),
-            resultform, SLOT(recieveData(QList<Container*>*, QList<Object*>*, qint64, QString, QString, QString, QString, QString, QString,
-                                         bool, int, int, int, QString))); // подключение сигнала к слоту нашей формы
+    connect(this, SIGNAL(sendData(DataSend*)), resultform, SLOT(recieveData(DataSend*))); // подключение сигнала к слоту нашей формы
 }
 
 MainWindow::~MainWindow()
 {
+    qDeleteAll(*containers);
+    delete containers;
+    qDeleteAll(*objects);
+    delete objects;
+    delete dataS;
+    ui->containersTable->clear();
+    ui->objectsTable->clear();
     delete ui;
 }
 
@@ -104,17 +111,16 @@ void MainWindow::on_mDataLoad_triggered()
     if(fileName.isEmpty())
         return;
 
-    QFileInfo fi(fileName);
-    fileN = fi.fileName();
+    on_mDataClear_triggered();
+
 
     QFile file (fileName);
     if (!file.open(QIODevice::ReadOnly))
     {
-        QMessageBox::information(this, "Внимание!", "Ошибка чтения файла " + fileN);
+        QMessageBox::information(this, "Внимание!", "Ошибка чтения файла " + fileName);
         return;
     }
 
-    on_mDataClear_triggered();
     bool isOld = false;
     if(fileName.right(4) == ".txt") //Совместимость со старым форматом
     {
@@ -221,17 +227,17 @@ void MainWindow::on_mDataLoad_triggered()
 
 void MainWindow::on_mDataSave_triggered()
 {
-    QString fileName = QFileDialog::getSaveFileName(this,
+    QString fileNameS = QFileDialog::getSaveFileName(this,
                                                     tr("Сохранить данные в файл .csv"),
                                                     QDir::currentPath(),
                                                     tr("Save file (*.csv)"));
-    if (fileName.isEmpty())
+    if (fileNameS.isEmpty())
     {
         QMessageBox::information(this, "Внимание!", "Имя файла не выбрано");
         return;
     }
 
-    QFile file(fileName);
+    QFile file(fileNameS);
 
     if (!file.open(QIODevice::WriteOnly))
     {
@@ -312,10 +318,12 @@ void MainWindow::checkTypeIndex()
 
 void MainWindow::createContainersList()
 {
+    qDeleteAll(*containers); //удаление всех объектов-контейнеров из предыдущего списка контейнеров
+    containers->clear(); //удаление из списка указателей на удаленные контейнеры
+
     int typeoftask = ui->typeBox->currentIndex();
     int dir = ui->directionBox->currentIndex();
     int pcr = ui->pkRuleBox->currentIndex();
-    containers = new QList<Container*>;
 
     for (int i = 0; i < ui->containersTable->rowCount(); i++)
     {
@@ -363,8 +371,10 @@ void MainWindow::createContainersList()
 
 void MainWindow::createObjectsList()
 {
+    qDeleteAll(*objects); //удаление всех объектов из предыдущего списка контейнеров
+    objects->clear(); //удаление из списка указателей на удаленные объекты
+
     int objectrule = ui->objectsRuleBox->currentIndex();
-    objects = new QList<Object*>;
     for (int i=0; i<ui->objectsTable->rowCount(); i++)
     {
         QString type = ui->objectsTable->item(i,0)->data(Qt::EditRole).toString();
@@ -375,8 +385,8 @@ void MainWindow::createObjectsList()
 
         switch(objectrule)
         {
-        case 0: //0 или 1
-        case 1:
+        case 1: //1 или 2
+        case 2:
         {
             for (int c = 0; c < count; c++)
             {
@@ -386,8 +396,8 @@ void MainWindow::createObjectsList()
             break;
         }
 
-        case 2:
-        case 5:
+        case 3:
+        case 0:
         {
             for (int c = 0; c < count; c++)
             {
@@ -397,8 +407,8 @@ void MainWindow::createObjectsList()
             break;
         }
 
-        case 3:
         case 4:
+        case 5:
         {
             for (int c = 0; c < count; c++)
             {
@@ -417,14 +427,14 @@ void MainWindow::sortObjectsList()
     int objectrule = ui->objectsRuleBox->currentIndex();
     switch(objectrule)
     {
-    case 0:
+    case 1:
         std::sort(objects->begin(), objects->end(), &SortingAlg::maxToLowV);
         break;
-    case 1:
+    case 2:
         std::sort(objects->begin(), objects->end(), &SortingAlg::lowToMaxV);
         break;
 
-    case 2:
+    case 3:
     {
         int direction = ui->directionBox->currentIndex();
         switch (direction)                                      //в зависимости от направления загрузки
@@ -451,13 +461,13 @@ void MainWindow::sortObjectsList()
     }
         break;
 
-    case 3:
+    case 4:
         std::sort(objects->begin(), objects->end(), &SortingAlg::maxW1W2minW3);
         break;
-    case 4:
+    case 5:
         std::sort(objects->begin(), objects->end(), &SortingAlg::minW1W2maxW3);
         break;
-    case 5:
+    case 0:
         break;
     }
 }
@@ -492,7 +502,7 @@ void MainWindow::locateInManyContainers()
         while (itc.hasNext()) //Перебор списка контейнеров
         {
             Container* con = itc.next();
-            if (con->locateObject(obj)) //Если объект размещён, выход из обхода контейнеров
+            if (con->locateObject(obj)) //Если объект размещён, удаление объекта из списка и выход из обхода контейнеров
             {
                 it.remove();
                 break;
@@ -530,31 +540,23 @@ void MainWindow::on_packButton_clicked()
         }
     }
 
-    qDebug()<<"begin ";
+    qDebug()<<"begin";
 
     createContainersList();
     createObjectsList();
 
-    QElapsedTimer timer;
     timer.start();
     sortObjectsList();
     locate();
     time = timer.nsecsElapsed();
 
+    int a = time;
+
+    makeData();
     resultform->show();
-
-    QString spinS;
-    if(ui->spinStatus->checkState() == 0)
-        spinS = "Нет";
-    else
-        spinS = "Да";
-
-    emit sendData(containers, objects, time, fileN, ui->typeBox->currentText(), ui->directionBox->currentText(),
-                  ui->objectsRuleBox->currentText(), ui->pkRuleBox->currentText(), spinS,
-                  testing, napr, objrule, PKrule, resDir);
+    emit sendData(dataS);
 
     qDebug()<<"end"<<endl;
-
 }
 
 
@@ -562,6 +564,8 @@ void MainWindow::on_packButton_clicked()
 //    QMessageBox::information(this, "Внимание!", QString::number(objects->count()));
 //ui->objectsTable->sortByColumn(1, Qt::AscendingOrder);
 //ui->objectsTable->sortItems(1, Qt::AscendingOrder); //Вроде как без разницы?
+
+
 
 void MainWindow::on_mTesting_triggered()
 {
@@ -571,14 +575,9 @@ void MainWindow::on_mTesting_triggered()
                                                  "/Users/dima/Desktop",
                                                  QFileDialog::ShowDirsOnly
                                                  | QFileDialog::DontResolveSymlinks);
-    resDir = sourceDir;
-    resDir.append("/Result/");
-    QDir().mkpath(resDir);
     if(sourceDir == "")
     {
-        QMessageBox msgBox;
-        msgBox.setText("Ошибка в пути к директории с файлами!");
-        msgBox.exec();
+        QMessageBox::information(this, "Внимание!", "Ошибка в пути к директории с файлами!");
         return;
     }
 
@@ -587,27 +586,42 @@ void MainWindow::on_mTesting_triggered()
     sourceFiles = currentDir.entryInfoList(QStringList(filename),
                                      QDir::Files | QDir::NoSymLinks);
 
+    long int percent = sourceFiles.size()*ui->directionBox->count()*ui->objectsRuleBox->count()*ui->pkRuleBox->count(); //Счетччик выполненных процентов
+    int ip = 0;
+    QProgressDialog progress("Создание отчётов...", "Отменить", 0, percent, this); //Прогресс-бар
+    progress.setWindowModality(Qt::WindowModal);
+    hideShowTesting();
+
    for (int i = 0; i < sourceFiles.size(); ++i)
    {
        fileName = sourceFiles.at(i).absoluteFilePath();
        on_mDataLoad_triggered();
 
-       for (napr = 0; napr<ui->directionBox->count(); napr++)
+       for (int napr = 0; napr<ui->directionBox->count(); napr++)
        {
            ui->directionBox->setCurrentIndex(napr);
-           for (objrule = 0; objrule < ui->objectsRuleBox->count(); objrule++)
+           for (int objrule = 0; objrule < ui->objectsRuleBox->count(); objrule++)
            {
                ui->objectsRuleBox->setCurrentIndex(objrule);
-               for (PKrule = 0; PKrule < ui->pkRuleBox->count(); PKrule++)
+               for (int PKrule = 0; PKrule < ui->pkRuleBox->count(); PKrule++)
                {
                    ui->pkRuleBox->setCurrentIndex(PKrule);
 
-                   qDebug()<<"begin ";
+                   progress.setValue(ip);
+                   if (progress.wasCanceled())
+                   {
+                       testing = false;
+                       QMessageBox::information(this, "Внимание!", "Операция прервана!");
+                       hideShowTesting();
+                       return;
+                   }
+                   ip++;
+
+                   qDebug()<<"begin";
 
                    createContainersList();
                    createObjectsList();
 
-                   QElapsedTimer timer;
                    timer.start();
                    sortObjectsList();
                    locate();
@@ -615,15 +629,8 @@ void MainWindow::on_mTesting_triggered()
 
 //                   resultform->show(); //Показывать окно не нужно, так быстрее
 
-                   QString spinS;
-                   if(ui->spinStatus->checkState() == 0)
-                       spinS = "Нет";
-                   else
-                       spinS = "Да";
-
-                   emit sendData(containers, objects, time, fileN, ui->typeBox->currentText(), ui->directionBox->currentText(),
-                                 ui->objectsRuleBox->currentText(), ui->pkRuleBox->currentText(), spinS,
-                                 testing, napr, objrule, PKrule, resDir);
+                   makeData();
+                   emit sendData(dataS);
 
                    qDebug()<<"end"<<endl;
                }
@@ -631,7 +638,77 @@ void MainWindow::on_mTesting_triggered()
        }
    }
 
-   QMessageBox msgBox;
-   msgBox.setText("Отчёты созданы!");
-   msgBox.exec();
+   progress.setValue(percent);
+   testing = false;
+   on_mDataClear_triggered();
+   hideShowTesting();
+   QMessageBox::information(this, "Внимание!", "Отчёты созданы!");
+}
+
+void MainWindow::on_mTestingAll_triggered()
+{
+    testing = true;
+}
+
+void MainWindow::makeData()
+{
+    dataS->containersD = containers;
+    dataS->objectsD = objects;
+    dataS->timeD = time;
+    dataS->typeTD = ui->typeBox->currentText();
+    dataS->dirTD = ui->directionBox->currentText();
+    dataS->dirD = ui->directionBox->currentIndex();
+    dataS->objruleTD = ui->objectsRuleBox->currentText();
+    dataS->objruleD = ui->objectsRuleBox->currentIndex();
+    dataS->pkruleTD = ui->pkRuleBox->currentText();
+    dataS->pkruleD = ui->pkRuleBox->currentIndex();
+
+    if(ui->spinStatus->checkState() == 0)
+        dataS->spinTD = "Нет";
+    else
+        dataS->spinTD = "Да";
+
+    QFileInfo fi(fileName);
+    dataS->fileND= fi.fileName();
+
+    dataS->testingD = testing;
+    if (!testing)
+    {
+        dataS->resDirD = fi.absoluteDir().absolutePath();
+        dataS->resDirD.append("/");
+    }
+    else
+    {
+        dataS->resDirD = sourceDir;
+        dataS->resDirD.append("/Result/");
+        QDir().mkpath(dataS->resDirD); //Создание подпапки для результата
+    }
+}
+
+void MainWindow::hideShowTesting()
+{
+    if (ui->testingLable->isHidden())
+    {
+        ui->testingLable->show();
+        ui->containersTable->hide();
+        ui->objectsTable->hide();
+        ui->containersLabel->hide();
+        ui->objectsLabel->hide();
+        ui->newContainerButton->hide();
+        ui->newObjectButton->hide();
+        ui->deleteContainerButton->hide();
+        ui->deleteObjectButton->hide();
+    }
+    else
+    {
+        ui->testingLable->hide();
+        ui->containersTable->show();
+        ui->objectsTable->show();
+        ui->containersLabel->show();
+        ui->objectsLabel->show();
+        ui->newContainerButton->show();
+        ui->newObjectButton->show();
+        ui->deleteContainerButton->show();
+        ui->deleteObjectButton->show();
+    }
 }

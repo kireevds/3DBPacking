@@ -5,6 +5,14 @@ Container::Container()
 
 }
 
+Container::~Container()
+{
+    qDeleteAll(*myobjects);
+    delete myobjects;
+    qDeleteAll(*myPotCons);
+    delete myPotCons;
+}
+
 Container::Container(QString t, int w, int l, int h, int dir, int pcr)
 {
     type = t;
@@ -73,7 +81,7 @@ void Container::createmyPotConsList()
     int end = myPotCons->size();
     for (int i = 0; i < end; i++) //Перекрытие объекта и ПК -> создание новых ПК
     {
-        Object* tempPotCon = new Object(*myPotCons->takeFirst()); //Старый ПК удаляется из списка и помещается во временную переменную для проверки перекрытия с объектом
+        Object* tempPotCon = myPotCons->takeFirst(); //Старый ПК удаляется из списка и помещается во временную переменную для проверки перекрытия с объектом
         int px = tempPotCon->width;
         int py = tempPotCon->length;
         int pz = tempPotCon->height;
@@ -133,6 +141,7 @@ void Container::createmyPotConsList()
                 myPotCons->append(newPotCon);
             }
         }
+        delete tempPotCon;
     }
 
     checkinside();
@@ -162,15 +171,18 @@ void Container::checkinside()
     {
         Object* PotCon = it.next();
         if(PotCon->flag == true)
+        {
+            delete PotCon;
             it.remove();
+        }
     }
 
-//    qDebug()<<"Spisok PC";
+//    qDebug()<<"Список ПК";
 //    QMutableListIterator<Object*> it3(*myPotCons);
 //    while (it3.hasNext())
 //    {
 //        Object* PotCon = it3.next();
-//        qDebug()<<"pk koordinati: ("<<PotCon->x<<"; "<<PotCon->y<<"; "<<PotCon->z<<") razmeri: ["<<PotCon->width<<"; "<<PotCon->length<<"; "<<PotCon->height<<"]";
+//        qDebug()<<"ПК: координаты: ("<<PotCon->x<<"; "<<PotCon->y<<"; "<<PotCon->z<<")   Размеры: ["<<PotCon->width<<"; "<<PotCon->length<<"; "<<PotCon->height<<"]";
 //    }
 
 }
@@ -179,7 +191,7 @@ void Container::sortPotCon(Object *obj)
 {
     switch(PotConRule)
     {
-    case 0:
+    case 1:
         for (int it = 0; it < myPotCons->size(); it++)
         {
             myPotCons->at(it)->result = myPotCons->at(it)->width * myPotCons->at(it)->length * myPotCons->at(it)->height;
@@ -187,7 +199,7 @@ void Container::sortPotCon(Object *obj)
         std::sort(myPotCons->begin(), myPotCons->end(), &SortingAlg::maxToLowV);
         break;
 
-    case 1:
+    case 2:
         for (int it = 0; it < myPotCons->size(); it++)
         {
             myPotCons->at(it)->result = myPotCons->at(it)->width * myPotCons->at(it)->length * myPotCons->at(it)->height;
@@ -195,7 +207,7 @@ void Container::sortPotCon(Object *obj)
         std::sort(myPotCons->begin(), myPotCons->end(), &SortingAlg::lowToMaxV);
         break;
 
-    case 2:
+    case 3:
     {
         switch (direction)                                      //в зависимости от направления загрузки
         {
@@ -221,7 +233,7 @@ void Container::sortPotCon(Object *obj)
     }
         break;
 
-    case 3:
+    case 4:
         for (int it = 0; it < myPotCons->size(); it++)
         {
             myPotCons->at(it)->result = myPotCons->at(it)->width * myPotCons->at(it)->length;
@@ -229,22 +241,12 @@ void Container::sortPotCon(Object *obj)
         std::sort(myPotCons->begin(), myPotCons->end(), &SortingAlg::maxW1W2minW3);
         break;
 
-    case 4:
+    case 5:
         for (int it = 0; it < myPotCons->size(); it++)
         {
             myPotCons->at(it)->result = myPotCons->at(it)->width * myPotCons->at(it)->length;
         }
         std::sort(myPotCons->begin(), myPotCons->end(), &SortingAlg::minW1W2maxW3);
-        break;
-
-    case 5:
-        for (int it = 0; it < myPotCons->size(); it++)
-        {
-            myPotCons->at(it)->wx = QString::number(obj->width);
-            myPotCons->at(it)->wy = QString::number(obj->length);
-            myPotCons->at(it)->wz = QString::number(obj->height);
-        }
-        std::sort(myPotCons->begin(), myPotCons->end(), &SortingAlg::minPw_w);
         break;
 
     case 6:
@@ -254,10 +256,20 @@ void Container::sortPotCon(Object *obj)
             myPotCons->at(it)->wy = QString::number(obj->length);
             myPotCons->at(it)->wz = QString::number(obj->height);
         }
-        std::sort(myPotCons->begin(), myPotCons->end(), &SortingAlg::maxPw_w);
+        std::sort(myPotCons->begin(), myPotCons->end(), &SortingAlg::minPw_w);
         break;
 
     case 7:
+        for (int it = 0; it < myPotCons->size(); it++)
+        {
+            myPotCons->at(it)->wx = QString::number(obj->width);
+            myPotCons->at(it)->wy = QString::number(obj->length);
+            myPotCons->at(it)->wz = QString::number(obj->height);
+        }
+        std::sort(myPotCons->begin(), myPotCons->end(), &SortingAlg::maxPw_w);
+        break;
+
+    case 0:
         break;
     }
 }

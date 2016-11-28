@@ -10,11 +10,13 @@ ContInfo::ContInfo(QWidget *parent) :
 
 ContInfo::~ContInfo()
 {
+    ui->tableWidget->clear();
     delete ui;
 }
 
 void ContInfo::recieveData2(QList<Object *> *objL)
 {
+    ui->tableWidget->clear();
     objects = objL;
     ui->tableWidget->setColumnCount(7);
     ui->tableWidget->setHorizontalHeaderLabels(QStringList() << "Тип" << "X" << "Y" << "Z" << "Ширина" << "Длина" << "Высота");

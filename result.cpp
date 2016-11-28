@@ -12,18 +12,22 @@ Result::Result(QWidget *parent) :
     ui->tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
 //    ui->tableWidget->setSortingEnabled(true); //неправильно работает: при переключении таблиц теряются столбцы
 
+    fullContainers = new QList<Container*>;
     connect(ui->showObjListButton, SIGNAL(clicked()), contInformation, SLOT(show()));
     connect(this, SIGNAL(sendData2(QList<Object*>*)), contInformation, SLOT(recieveData2(QList<Object*>*)));
 }
 
 Result::~Result()
 {
+    ui->tableWidget->clear();
+    delete fullContainers;
     delete ui;
 }
 
-void Result::recieveData(QList<Container*>* c, QList<Object*>* o, qint64 t, QString f, QString type, QString dir, QString objrule, QString pkrule, QString spin, bool tes, int nap, int objr, int pkr, QString rd)
+void Result::recieveData(DataSend* ds)
 {
-    qDebug()<<"recieved "<<nap<<" "<<objr<<" "<<pkr;
+    qDebug()<<"recieved "<<ds->dirD<<ds->objruleD<<ds->pkruleD;
+    dtr = ds;
     contCount = 0;
     contNotCount = 0;
     objCount = 0;
@@ -32,31 +36,22 @@ void Result::recieveData(QList<Container*>* c, QList<Object*>* o, qint64 t, QStr
     minOccup = 1000;
     maxOccup = -1;
     ui->comboBox->clear();
+    ui->tableWidget->clear();
+    fullContainers->clear();
 
-    testing = tes;
-    napr = nap;
-    objru = objr;
-    PKru = pkr;
-    resDir = rd;
+    testing = dtr->testingD;
 
-    containers = c;
-    objects = o;
+    containers = dtr->containersD;
+    objects = dtr->objectsD;
     objNotCount = objects->size();
-    time = t;
-    fileN = f;
-    fileNT = fileN;
-    fileNT.chop(4);
-    typeBox = type;
-    direction = dir;
-    objRule = objrule;
-    PKRule = pkrule;
-    spinStatus = spin;
 
-    QString stime = QString::number(time);
+    fileNT = dtr->fileND;
+    fileNT.chop(4);
+
+    QString stime = QString::number(dtr->timeD);
     stime.chop(3);
     ui->timeCount->setText(stime + " мкс");
 
-    fullContainers = new QList<Container*>;
     QListIterator<Container*> it(*containers);
     while (it.hasNext())
     {
@@ -67,8 +62,7 @@ void Result::recieveData(QList<Container*>* c, QList<Object*>* o, qint64 t, QStr
         }
         else
         {
-            Container * newCont = new Container(*PotCon);
-            fullContainers->append(newCont);
+            fullContainers->append(PotCon);
 
             contCount = contCount + 1;
             objCount = objCount + PotCon->myobjects->size();
@@ -370,12 +364,12 @@ void Result::on_saveResultButton_clicked()
     {
             fileName = QFileDialog::getSaveFileName(this,
                                                     tr("Сохранить результат в файл .csv"),
-                                                    fileNT + "-результат",
+                                                    dtr->resDirD+fileNT + QString("-result-")+QString::number(dtr->dirD)+"-"+QString::number(dtr->objruleD)+"-"+QString::number(dtr->pkruleD),
                                                     tr("Save file (*.csv)"));
     }
     else
     {
-        fileName = resDir+fileNT+"-результат-"+QString::number(napr)+"-"+QString::number(objru)+"-"+QString::number(PKru)+".csv";
+        fileName = dtr->resDirD+fileNT+QString("-result-")+QString::number(dtr->dirD)+"-"+QString::number(dtr->objruleD)+"-"+QString::number(dtr->pkruleD)+".csv";
     }
 
     if (fileName.isEmpty())
@@ -399,12 +393,12 @@ void Result::on_saveResultButton_clicked()
     out.setCodec(codec);
 //--------
 
-    out << QString("Результат упаковки по данным из файла")<<";"<<fileN<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
-    out << QString("Тип решаемой задачи")<<";"<<typeBox<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
-    out << QString("Направление загрузки контейнера")<<";"<<direction<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
-    out << QString("Правило выбора объектов")<<";"<<objRule<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
-    out << QString("Правило выбора ПК")<<";"<<PKRule<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
-    out << QString("Возможность вращения объектов")<<";"<<spinStatus<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
+    out << QString("Результат упаковки по данным из файла")<<";"<<dtr->fileND<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
+    out << QString("Тип решаемой задачи")<<";"<<dtr->typeTD<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
+    out << QString("Направление загрузки контейнера")<<";"<<dtr->dirTD<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
+    out << QString("Правило выбора объектов")<<";"<<dtr->objruleTD<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
+    out << QString("Правило выбора ПК")<<";"<<dtr->pkruleTD<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
+    out << QString("Возможность вращения объектов")<<";"<<dtr->spinTD<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
     out <<"- - - - -;- - - - -;- - - - -;- - - - -;- - - - -;- - - - -;- - - - -;"<<endl;
     out << QString("Количество размещенных объектов")<<";"<<objCount<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
     out << QString("Количество неразмещенных объектов")<<";"<<objNotCount<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
@@ -413,7 +407,7 @@ void Result::on_saveResultButton_clicked()
     out << QString("Средняя заполняемость контейнеров")<<";"<<QString(generateOccupation(avgOccup))<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
     out << QString("Максимальная заполняемость контейнеров")<<";"<<QString(generateOccupation(maxOccup))<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
     out << QString("Минимальная заполняемость контейнеров")<<";"<<QString(generateOccupation(minOccup))<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
-    QString stime = QString::number(time);
+    QString stime = QString::number(dtr->timeD);
     stime.chop(3);
     out << QString("Общее время размещения объектов")<<";"<<stime<<QString(" мкс")<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
     out <<";"<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
@@ -474,5 +468,5 @@ void Result::on_saveResultButton_clicked()
 
     file.close();
 
-    qDebug()<<"recorded "<<napr<<" "<<objru<<" "<<PKru;
+    qDebug()<<"recorded "<<dtr->dirD<<dtr->objruleD<<dtr->pkruleD;
 }

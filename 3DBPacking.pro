@@ -25,7 +25,8 @@ HEADERS  += mainwindow.h \
     object.h \
     sortingalg.h \
     result.h \
-    continfo.h
+    continfo.h \
+    datasend.h
 
 FORMS    += mainwindow.ui \
     result.ui \
