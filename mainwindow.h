@@ -57,6 +57,10 @@ private slots:
 
     void on_mTestingAll_triggered();
 
+    void on_utfCode_clicked(); //Выбор кодировки CP1251
+
+    void on_winCode_clicked(); //Выбор кодировки UTF-8
+
 private:
     Result* resultform;
     Ui::MainWindow *ui;
@@ -64,13 +68,18 @@ private:
     QList<Container*>* containers;
     QList<Object*>* objects;
     QElapsedTimer timer;
-    qint64 time; //Время заполнения
+    qint64 time; //Время заполнения (результат)
+    qint64 time2; //Время заполнения (отсчитываемое)
 
     QString fileName; //полное имя файла для открытия
     QString sourceDir; //директория с файлами-источниками
     QFileInfoList sourceFiles; //список файлов-источников
+    QString dirSourceName; //Название папки с файлами
+    QString fileNameSR; //Полный путь файла со сводным отчётом
 
     bool testing;
+    bool testingAll;
+    bool testCancel; //флаг на отмену тестирования
 
     void checkTypeIndex(); //показать колонки таблицы в зависимости от типа задачи
     void createContainersList(); //создание списка контейнеров по табличным данным

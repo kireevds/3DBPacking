@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QtDebug>
+#include <QTextCodec>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -25,6 +26,8 @@ MainWindow::MainWindow(QWidget *parent) :
     on_mDataClear_triggered();
 
     testing = false;
+    testingAll = false;
+    testCancel = false;
 
     connect(this, SIGNAL(sendData(DataSend*)), resultform, SLOT(recieveData(DataSend*))); // подключение сигнала к слоту нашей формы
 }
@@ -121,16 +124,34 @@ void MainWindow::on_mDataLoad_triggered()
         return;
     }
 
+    QString newline;
+    QStringList datalist;
+
     bool isOld = false;
     if(fileName.right(4) == ".txt") //Совместимость со старым форматом
     {
-        file.readLine();
+        newline = file.readLine();
+        if (!newline.startsWith("Packer"))
+        {
+            return;
+        }
         file.readLine();
         isOld = true;
     }
+    else if (fileName.right(4) == ".csv") //Проверка на новый формат
+    {
+        newline = file.readLine();
+        datalist = newline.split(";");
+        if (datalist[0] != "3DBPacking")
+        {
+            return;
+        }
+    }
+    else
+        return;
 
-    QString newline = file.readLine();
-    QStringList datalist = newline.split(";");
+    newline = file.readLine();
+    datalist = newline.split(";");
     int containersNumber = datalist[0].toInt();
     ui->containersTable->setRowCount(containersNumber);
 
@@ -246,7 +267,13 @@ void MainWindow::on_mDataSave_triggered()
     }
 
     QTextStream out(&file);
+    if (ui->winCode->isChecked()) //Для записи текста в кодировке CP1251, открывающейся в excel
+    {
+        QTextCodec *codec = QTextCodec::codecForName("cp1251");
+        out.setCodec(codec);
+    }
 
+    out << "3DBPacking"<< ";"<< ";"<< ";"<< ";"<< endl;
     out << ui->containersTable->rowCount() << ";"<< ";"<< ";"<< ";"<< endl;
     for(int i = 0; i < ui->containersTable->rowCount(); i++)
     {
@@ -540,23 +567,31 @@ void MainWindow::on_packButton_clicked()
         }
     }
 
-    qDebug()<<"begin";
+//    qDebug()<<"begin";
+    time = 0;
 
-    createContainersList();
-    createObjectsList();
+    for (int ic = 0; ic<20; ic++)
+    {
+        createContainersList();
+        createObjectsList();
 
-    timer.start();
-    sortObjectsList();
-    locate();
-    time = timer.nsecsElapsed();
+        timer.start();
+        sortObjectsList();
+        locate();
+        time2 = timer.nsecsElapsed();
+//        qDebug()<<ic<<QString::number(time2);
+        if (ic >9) //Отбрасываем первые 10 значений
+        {
+            time = time+time2;
+        }
+    }
 
-    int a = time;
-
+    time = time/10;
     makeData();
     resultform->show();
     emit sendData(dataS);
 
-    qDebug()<<"end"<<endl;
+//    qDebug()<<"end"<<endl;
 }
 
 
@@ -567,18 +602,24 @@ void MainWindow::on_packButton_clicked()
 
 
 
-void MainWindow::on_mTesting_triggered()
+void MainWindow::on_mTesting_triggered()                    //Доделать, чтобы сводные отчёты не попадали в sourceFiles !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 {
     testing = true;
-    //выбор директории с файлами - ресурсами
-    sourceDir = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
-                                                 "/Users/dima/Desktop",
-                                                 QFileDialog::ShowDirsOnly
-                                                 | QFileDialog::DontResolveSymlinks);
-    if(sourceDir == "")
+    testCancel = false;
+    if(!testingAll)
     {
-        QMessageBox::information(this, "Внимание!", "Ошибка в пути к директории с файлами!");
-        return;
+        //выбор директории с файлами - ресурсами
+        sourceDir = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
+                                                     "/Users/dima/Desktop",
+                                                     QFileDialog::ShowDirsOnly
+                                                     | QFileDialog::DontResolveSymlinks);
+        if(sourceDir == "")
+        {
+            QMessageBox::information(this, "Внимание!", "Ошибка в пути к директории с файлами!");
+            return;
+        }
+        dirSourceName = sourceDir;
+        hideShowTesting();
     }
 
     QDir currentDir = QDir(sourceDir);
@@ -586,11 +627,10 @@ void MainWindow::on_mTesting_triggered()
     sourceFiles = currentDir.entryInfoList(QStringList(filename),
                                      QDir::Files | QDir::NoSymLinks);
 
-    long int percent = sourceFiles.size()*ui->directionBox->count()*ui->objectsRuleBox->count()*ui->pkRuleBox->count(); //Счетччик выполненных процентов
+    long int percent = sourceFiles.size()*ui->directionBox->count()*ui->objectsRuleBox->count()*ui->pkRuleBox->count(); //Счетчик выполненных процентов
     int ip = 0;
-    QProgressDialog progress("Создание отчётов...", "Отменить", 0, percent, this); //Прогресс-бар
+    QProgressDialog progress("Создание отчётов по \""+dirSourceName+"\"...", "Отменить", 0, percent-1, this); //Прогресс-бар
     progress.setWindowModality(Qt::WindowModal);
-    hideShowTesting();
 
    for (int i = 0; i < sourceFiles.size(); ++i)
    {
@@ -611,50 +651,116 @@ void MainWindow::on_mTesting_triggered()
                    if (progress.wasCanceled())
                    {
                        testing = false;
+                       testCancel = true;
                        QMessageBox::information(this, "Внимание!", "Операция прервана!");
+                       on_mDataClear_triggered();
                        hideShowTesting();
                        return;
                    }
                    ip++;
 
-                   qDebug()<<"begin";
+//                   qDebug()<<"begin";
+                   time = 0;
 
-                   createContainersList();
-                   createObjectsList();
+                   for (int ic = 0; ic<20; ic++)
+                   {
+                       createContainersList();
+                       createObjectsList();
 
-                   timer.start();
-                   sortObjectsList();
-                   locate();
-                   time = timer.nsecsElapsed();
+                       timer.start();
+                       sortObjectsList();
+                       locate();
+                       time2 = timer.nsecsElapsed();
+//                       qDebug()<<ic<<QString::number(time2);
+                       if (ic >9) //Отбрасываем первые 10 значений
+                       {
+                           time = time+time2;
+                       }
+                   }
+
+                   time = time/10;
 
 //                   resultform->show(); //Показывать окно не нужно, так быстрее
 
                    makeData();
                    emit sendData(dataS);
 
-                   qDebug()<<"end"<<endl;
+//                   qDebug()<<"end"<<endl;
                }
            }
        }
    }
 
-   progress.setValue(percent);
    testing = false;
    on_mDataClear_triggered();
-   hideShowTesting();
-   QMessageBox::information(this, "Внимание!", "Отчёты созданы!");
+   if(!testingAll)
+   {
+       hideShowTesting();
+       QMessageBox::information(this, "Внимание!", "Отчёты созданы!");
+   }
 }
 
 void MainWindow::on_mTestingAll_triggered()
 {
-    testing = true;
+    testingAll = true;
+    //выбор директории с файлами - ресурсами
+    sourceDir = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
+                                                 "/Users/dima/Desktop",
+                                                 QFileDialog::ShowDirsOnly
+                                                 | QFileDialog::DontResolveSymlinks);
+    if(sourceDir == "")
+    {
+        QMessageBox::information(this, "Внимание!", "Ошибка в пути к директории с файлами!");
+        return;
+    }
+
+    QDir mainDir = QDir(sourceDir);
+    QString filename = "*";
+    QFileInfoList sourceDirs = mainDir.entryInfoList(QStringList(filename),
+                                          QDir::Dirs | QDir::NoSymLinks | QDir::NoDotAndDotDot);  //список директорий-источников
+
+    if(sourceDirs.size()==1 && sourceDirs.at(0).baseName()=="Result") //Отлавливаем папку с результатами, чтобы не было ошибок
+        sourceDirs.clear();
+
+    if (sourceDirs.isEmpty())
+        sourceDirs.append(QFileInfo(mainDir.absolutePath()));
+
+    fileNameSR = sourceDir+"/Summary Result 3DBP.csv";
+    QFile file(fileNameSR);
+    if (!file.open(QIODevice::WriteOnly))
+    {
+        QMessageBox::information(this, "Внимание!", "Ошибка создания файла с общим результатом");
+        return;
+    }
+    QTextStream out(&file);
+    if (ui->winCode->isChecked()) //Для записи текста в кодировке CP1251, открывающейся в excel
+    {
+        QTextCodec *codec = QTextCodec::codecForName("cp1251");
+        out.setCodec(codec);
+    }
+    out<<QString("Класс задач;Задача;Число контейнеров;Число объектов;№ направления загрузки контейнера;№ правила выбора объектов;№ правила выбора ПК;"
+                 "Решение (число заполненных контейнеров);Время размещения (мкс)")<< endl;
+    file.close();
+
+    hideShowTesting();
+    for (int ifc=0; ifc<sourceDirs.size(); ifc++)
+    {
+        sourceDir = sourceDirs.at(ifc).absoluteFilePath();
+        dirSourceName = sourceDirs.at(ifc).baseName();
+        on_mTesting_triggered();
+    }
+    testingAll=false;
+    if (!testCancel)
+    {
+        hideShowTesting();
+        QMessageBox::information(this, "Внимание!", "Все отчёты созданы!");
+    }
 }
 
 void MainWindow::makeData()
 {
     dataS->containersD = containers;
     dataS->objectsD = objects;
-    dataS->timeD = time;
     dataS->typeTD = ui->typeBox->currentText();
     dataS->dirTD = ui->directionBox->currentText();
     dataS->dirD = ui->directionBox->currentIndex();
@@ -662,6 +768,11 @@ void MainWindow::makeData()
     dataS->objruleD = ui->objectsRuleBox->currentIndex();
     dataS->pkruleTD = ui->pkRuleBox->currentText();
     dataS->pkruleD = ui->pkRuleBox->currentIndex();
+
+    QString stime = QString::number(time);
+    stime.chop(3);
+    stime.append(" мкс");
+    dataS->stimeD = stime;
 
     if(ui->spinStatus->checkState() == 0)
         dataS->spinTD = "Нет";
@@ -671,7 +782,12 @@ void MainWindow::makeData()
     QFileInfo fi(fileName);
     dataS->fileND= fi.fileName();
 
+    dataS->winCode = ui->winCode->isChecked();
     dataS->testingD = testing;
+    dataS->testingAllD = testingAll;
+    dataS->dirSourceNameD = dirSourceName;
+    dataS->fileNameSRD = fileNameSR;
+
     if (!testing)
     {
         dataS->resDirD = fi.absoluteDir().absolutePath();
@@ -711,4 +827,15 @@ void MainWindow::hideShowTesting()
         ui->deleteContainerButton->show();
         ui->deleteObjectButton->show();
     }
+}
+void MainWindow::on_utfCode_clicked()
+{
+    ui->winCode->setChecked(false);
+    ui->utfCode->setChecked(true);
+}
+
+void MainWindow::on_winCode_clicked()
+{
+    ui->winCode->setChecked(true);
+    ui->utfCode->setChecked(false);
 }

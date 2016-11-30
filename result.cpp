@@ -26,7 +26,7 @@ Result::~Result()
 
 void Result::recieveData(DataSend* ds)
 {
-    qDebug()<<"recieved "<<ds->dirD<<ds->objruleD<<ds->pkruleD;
+//    qDebug()<<"recieved "<<ds->dirD<<ds->objruleD<<ds->pkruleD;
     dtr = ds;
     contCount = 0;
     contNotCount = 0;
@@ -48,9 +48,7 @@ void Result::recieveData(DataSend* ds)
     fileNT = dtr->fileND;
     fileNT.chop(4);
 
-    QString stime = QString::number(dtr->timeD);
-    stime.chop(3);
-    ui->timeCount->setText(stime + " мкс");
+    ui->timeCount->setText(dtr->stimeD);
 
     QListIterator<Container*> it(*containers);
     while (it.hasNext())
@@ -358,6 +356,31 @@ void Result::on_showObjListButton_clicked()
 
 void Result::on_saveResultButton_clicked()
 {
+    if(dtr->testingAllD) //Запись в сводный отчёт
+    {
+        QFile file(dtr->fileNameSRD);
+        if (!file.open(QIODevice::Append))
+        {
+            QMessageBox::information(this, "Внимание!", "Ошибка записи в файл сводного отчёта!");
+            return;
+        }
+
+        QTextStream out(&file);
+
+        if (dtr->winCode) //Для записи текста в кодировке CP1251, открывающейся в excel
+        {
+            QTextCodec *codec = QTextCodec::codecForName("cp1251");
+            out.setCodec(codec);
+        }
+
+        QString stime = dtr->stimeD;
+        stime.chop(4);
+        out<<dtr->dirSourceNameD<<";"<<dtr->fileND<<";"<<QString::number(contCount+contNotCount)<<";"<<QString::number(objCount+objNotCount)<<";"
+          <<QString::number(dtr->dirD)<<";"<<QString::number(dtr->objruleD)<<";"<<QString::number(dtr->pkruleD)<<";"<<QString::number(contCount)<<";"<<stime<<endl;
+
+        file.close();
+    }
+
     QString fileName;
 
     if(!testing)
@@ -388,10 +411,11 @@ void Result::on_saveResultButton_clicked()
 
     QTextStream out(&file);
 
-//--------  Для записи текста в кодировке, открывающейся в excel, раскомментировать 2 строчки
-    QTextCodec *codec = QTextCodec::codecForName("cp1251");
-    out.setCodec(codec);
-//--------
+    if (dtr->winCode) //Для записи текста в кодировке CP1251, открывающейся в excel
+    {
+        QTextCodec *codec = QTextCodec::codecForName("cp1251");
+        out.setCodec(codec);
+    }
 
     out << QString("Результат упаковки по данным из файла")<<";"<<dtr->fileND<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
     out << QString("Тип решаемой задачи")<<";"<<dtr->typeTD<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
@@ -407,9 +431,7 @@ void Result::on_saveResultButton_clicked()
     out << QString("Средняя заполняемость контейнеров")<<";"<<QString(generateOccupation(avgOccup))<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
     out << QString("Максимальная заполняемость контейнеров")<<";"<<QString(generateOccupation(maxOccup))<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
     out << QString("Минимальная заполняемость контейнеров")<<";"<<QString(generateOccupation(minOccup))<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
-    QString stime = QString::number(dtr->timeD);
-    stime.chop(3);
-    out << QString("Общее время размещения объектов")<<";"<<stime<<QString(" мкс")<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
+    out << QString("Общее время размещения объектов")<<";"<<dtr->stimeD<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
     out <<";"<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
     out <<"- - - - -;- - - - -;- - - - -;- - - - -;- - - - -;- - - - -;- - - - -;"<<endl;
     out <<";"<<";"<<";"<<";"<<";"<<";"<<";"<<endl;
@@ -468,5 +490,5 @@ void Result::on_saveResultButton_clicked()
 
     file.close();
 
-    qDebug()<<"recorded "<<dtr->dirD<<dtr->objruleD<<dtr->pkruleD;
+//    qDebug()<<"recorded "<<dtr->fileND<<dtr->dirD<<dtr->objruleD<<dtr->pkruleD;
 }

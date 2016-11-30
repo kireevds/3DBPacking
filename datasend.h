@@ -8,7 +8,7 @@ class DataSend
 public:
     QList<Container*>* containersD;
     QList<Object*>* objectsD;
-    qint64 timeD; //Время заполнения
+    QString stimeD; //Время заполнения
     QString fileND; //Имя файла с исходными данными
     QString typeTD; //Тип решаемой задачи (текст)
     QString dirTD; //Направление загрузки (текст)
@@ -20,6 +20,10 @@ public:
     QString spinTD; //Возможность вращения (текст)
     bool testingD; //Проводится тестирование?
     QString resDirD; //Директория хранения результатов
+    bool winCode; //Кодировка CP1251
+    bool testingAllD; //Сводное тестирование
+    QString dirSourceNameD; //Название папки с файлами
+    QString fileNameSRD; //Полный путь файла со сводным отчётом
 };
 
 #endif // DATASEND_H
