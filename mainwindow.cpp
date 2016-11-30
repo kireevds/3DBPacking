@@ -605,7 +605,6 @@ void MainWindow::on_packButton_clicked()
 void MainWindow::on_mTesting_triggered()                    //Доделать, чтобы сводные отчёты не попадали в sourceFiles !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 {
     testing = true;
-    testCancel = false;
     if(!testingAll)
     {
         //выбор директории с файлами - ресурсами
@@ -714,6 +713,7 @@ void MainWindow::on_mTestingAll_triggered()
         return;
     }
 
+    hideShowTesting();
     QDir mainDir = QDir(sourceDir);
     QString filename = "*";
     QFileInfoList sourceDirs = mainDir.entryInfoList(QStringList(filename),
@@ -742,19 +742,21 @@ void MainWindow::on_mTestingAll_triggered()
                  "Решение (число заполненных контейнеров);Время размещения (мкс)")<< endl;
     file.close();
 
-    hideShowTesting();
     for (int ifc=0; ifc<sourceDirs.size(); ifc++)
     {
         sourceDir = sourceDirs.at(ifc).absoluteFilePath();
         dirSourceName = sourceDirs.at(ifc).baseName();
         on_mTesting_triggered();
+        if(testCancel)
+            ifc=sourceDirs.size();
     }
-    testingAll=false;
     if (!testCancel)
     {
         hideShowTesting();
         QMessageBox::information(this, "Внимание!", "Все отчёты созданы!");
     }
+    testCancel = false;
+    testingAll=false;
 }
 
 void MainWindow::makeData()
