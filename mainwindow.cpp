@@ -176,6 +176,11 @@ void MainWindow::on_mDataLoad_triggered()
             value = datalist[j].toInt(); //Ширина, длина, высота контейнера
             sizeItem->setData(Qt::EditRole, value);
             ui->containersTable->setItem(i,j, sizeItem);
+
+            //    ------ анализ объектов
+                contS = value;
+            //    ------
+
         }
 
         if(isOld)
@@ -222,7 +227,14 @@ void MainWindow::on_mDataLoad_triggered()
             value = datalist[j].toInt(); //Ширина, длина, высота объекта
             sizeItem->setData(Qt::EditRole, value);
             ui->objectsTable->setItem(i,j, sizeItem);
+
+            //    ------ анализ объектов
+                objSize[j-1]=value;
+            //    ------
+
         }
+
+        analyze(); //  анализ объектов
 
         if(isOld)
         {
@@ -244,6 +256,57 @@ void MainWindow::on_mDataLoad_triggered()
     file.close();
 
     checkTypeIndex();
+}
+
+void MainWindow::analyze()
+{
+    QFile file2a("/Users/dima/Desktop/analiz.csv");
+
+    if (!file2a.open(QIODevice::Append))
+    {
+        QMessageBox::information(this, "Внимание!", "Ошибка создания файла");
+        return;
+    }
+
+    QTextStream out2a(&file2a);
+    if (ui->winCode->isChecked()) //Для записи текста в кодировке CP1251, открывающейся в excel
+    {
+        QTextCodec *codec = QTextCodec::codecForName("cp1251");
+        out2a.setCodec(codec);
+    }
+
+    std::sort(std::begin(objSize),std::end(objSize));
+
+//         cube - квадратные
+//         rectangle - прямоугольные
+//         long Rectangle - вытянутые прямоугольники - колонна
+//         slim Rectangle - плоские прямоугольники - дверь
+
+//         small - маленькие (относительно контейнера) - максимальная сторона объекта занимает до 30% от стороны контейнера
+//         medium - средние - от 30% до 70%
+//         big - большие - более 70%
+
+    out2a << fileName.right(18) << ";"<< objSize[0]<< ";"<< objSize[1]<< ";"<<objSize[2]<< ";";
+    if ((objSize[0]>=(objSize[1]-objSize[1]*0.1-2)) && (objSize[2]<=(objSize[1]+objSize[1]*0.1+2)))
+        out2a << "cube";
+    else if ((objSize[0]>=(objSize[1]-objSize[1]*0.2-2)) && ((objSize[1]*3)<=objSize[2]))
+        out2a << "long Rectangle";
+    else if ((objSize[1]>=(objSize[2]-objSize[2]*0.2-2)) && ((objSize[0]*4)<=objSize[1]))
+        out2a << "slim Rectangle";
+    else
+        out2a << "rectangle";
+
+    out2a << ";";
+
+    if(objSize[2]<=contS*0.3)
+        out2a << "small";
+    else if(objSize[2]>=contS*0.7)
+        out2a << "big";
+    else
+        out2a << "medium";
+
+    out2a<< endl;
+    file2a.close();
 }
 
 void MainWindow::on_mDataSave_triggered()
