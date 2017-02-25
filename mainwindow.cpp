@@ -287,7 +287,11 @@ void MainWindow::analyze()
 //         big - большие - более 70%
 
     out2a << fileName.right(18) << ";"<< objSize[0]<< ";"<< objSize[1]<< ";"<<objSize[2]<< ";";
-    if ((objSize[0]>=(objSize[1]-objSize[1]*0.1-2)) && (objSize[2]<=(objSize[1]+objSize[1]*0.1+2)))
+    if (objSize[1]<10 &&  (objSize[0]>=(objSize[1]-1)) && (objSize[2]<=(objSize[1]+1)))
+        out2a << "cube";
+    else if (objSize[1]>=10 && objSize[1]<=30 && (objSize[0]>=(objSize[1]-objSize[1]*0.1)) && (objSize[2]<=(objSize[1]+objSize[1]*0.1)))
+        out2a << "cube";
+    else if (objSize[1]>30 && (objSize[0]>=(objSize[1]-objSize[1]*0.1-1)) && (objSize[2]<=(objSize[1]+objSize[1]*0.1+1)))
         out2a << "cube";
     else if ((objSize[0]>=(objSize[1]-objSize[1]*0.2-2)) && ((objSize[1]*3)<=objSize[2]))
         out2a << "long Rectangle";
