@@ -177,9 +177,9 @@ void MainWindow::on_mDataLoad_triggered()
             sizeItem->setData(Qt::EditRole, value);
             ui->containersTable->setItem(i,j, sizeItem);
 
-            //    ------ анализ объектов
-                contS = value;
-            //    ------
+//            //    ------ анализ объектов
+//                contS = value;
+//            //    ------
 
         }
 
@@ -228,13 +228,13 @@ void MainWindow::on_mDataLoad_triggered()
             sizeItem->setData(Qt::EditRole, value);
             ui->objectsTable->setItem(i,j, sizeItem);
 
-            //    ------ анализ объектов
-                objSize[j-1]=value;
-            //    ------
+//            //    ------ анализ объектов
+//                objSize[j-1]=value;
+//            //    ------
 
         }
 
-        analyze(); //  анализ объектов
+//        analyze(); //  анализ объектов
 
         if(isOld)
         {
@@ -258,7 +258,7 @@ void MainWindow::on_mDataLoad_triggered()
     checkTypeIndex();
 }
 
-void MainWindow::analyze()
+void MainWindow::analyze() //тестовая функция, в основной программе не нужна
 {
     QFile file2a("/Users/dima/Desktop/analiz.csv");
 
@@ -693,10 +693,19 @@ void MainWindow::on_mTesting_triggered()                    //Доделать, 
     sourceFiles = currentDir.entryInfoList(QStringList(filename),
                                      QDir::Files | QDir::NoSymLinks);
 
-    long int percent = sourceFiles.size()*ui->directionBox->count()*ui->objectsRuleBox->count()*ui->pkRuleBox->count(); //Счетчик выполненных процентов
+    long int percent = sourceFiles.size()*ui->directionBox->count()*ui->objectsRuleBox->count()*ui->pkRuleBox->count()*20; //Счетчик выполненных процентов
     int ip = 0;
     QProgressDialog progress("Создание отчётов по \""+dirSourceName+"\"...", "Отменить", 0, percent-1, this); //Прогресс-бар
+    progress.setWindowTitle("Прогресс тетстирования");
     progress.setWindowModality(Qt::WindowModal);
+
+    QVBoxLayout *layout = new QVBoxLayout;      //автоширина окна с прогресс-баром
+    foreach (QObject *obj, progress.children()) {
+        QWidget *widget = qobject_cast<QWidget *>(obj);
+        if (widget)
+            layout->addWidget(widget);
+    }
+    progress.setLayout(layout);
 
    for (int i = 0; i < sourceFiles.size(); ++i)
    {
@@ -723,13 +732,14 @@ void MainWindow::on_mTesting_triggered()                    //Доделать, 
                        hideShowTesting();
                        return;
                    }
-                   ip++;
+
 
 //                   qDebug()<<"begin";
                    time = 0;
 
                    for (int ic = 0; ic<20; ic++)
                    {
+                       ip++;
                        createContainersList();
                        createObjectsList();
 

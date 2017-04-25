@@ -4,7 +4,8 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT += core gui
+QT += opengl
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -18,7 +19,8 @@ SOURCES += main.cpp\
     object.cpp \
     sortingalg.cpp \
     result.cpp \
-    continfo.cpp
+    continfo.cpp \
+    mainscene.cpp
 
 HEADERS  += mainwindow.h \
     container.h \
@@ -26,7 +28,8 @@ HEADERS  += mainwindow.h \
     sortingalg.h \
     result.h \
     continfo.h \
-    datasend.h
+    datasend.h \
+    mainscene.h
 
 FORMS    += mainwindow.ui \
     result.ui \

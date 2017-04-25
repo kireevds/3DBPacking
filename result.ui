@@ -6,9 +6,27 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>931</width>
-    <height>645</height>
+    <width>929</width>
+    <height>650</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>929</width>
+    <height>650</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>929</width>
+    <height>650</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Результат упаковки</string>
@@ -225,152 +243,7 @@
     <enum>Qt::Horizontal</enum>
    </property>
   </widget>
-  <widget class="QWidget" name="pwidget" native="true">
-   <property name="geometry">
-    <rect>
-     <x>50</x>
-     <y>360</y>
-     <width>321</width>
-     <height>271</height>
-    </rect>
-   </property>
-   <widget class="QLabel" name="label_16">
-    <property name="geometry">
-     <rect>
-      <x>140</x>
-      <y>120</y>
-      <width>59</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>&lt;pic&gt;</string>
-    </property>
-   </widget>
-  </widget>
-  <widget class="QWidget" name="gridLayoutWidget_2">
-   <property name="geometry">
-    <rect>
-     <x>450</x>
-     <y>360</y>
-     <width>471</width>
-     <height>201</height>
-    </rect>
-   </property>
-   <layout class="QGridLayout" name="gridLayout_2">
-    <item row="5" column="0">
-     <widget class="QLabel" name="label_15">
-      <property name="text">
-       <string>Заполняемость контейнера:</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="0">
-     <widget class="QLabel" name="label_12">
-      <property name="text">
-       <string>Тип контейнера:</string>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="1">
-     <widget class="QLabel" name="contObjCount">
-      <property name="text">
-       <string>- - -</string>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="1">
-     <widget class="QLabel" name="contVol">
-      <property name="text">
-       <string>- - -</string>
-      </property>
-     </widget>
-    </item>
-    <item row="5" column="1">
-     <widget class="QLabel" name="contOccup">
-      <property name="text">
-       <string>- - -</string>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="0">
-     <widget class="QLabel" name="label_5">
-      <property name="text">
-       <string>Объём контейнера:</string>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="1">
-     <widget class="QLabel" name="contSize">
-      <property name="text">
-       <string>- - -</string>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="0">
-     <widget class="QLabel" name="label_13">
-      <property name="text">
-       <string>Размеры контейнера:</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="1">
-     <widget class="QLabel" name="contType">
-      <property name="text">
-       <string>- - -</string>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="0">
-     <widget class="QLabel" name="label_14">
-      <property name="text">
-       <string>Количество упакованных объектов:</string>
-      </property>
-     </widget>
-    </item>
-    <item row="4" column="0">
-     <widget class="QLabel" name="label_11">
-      <property name="text">
-       <string>Объём упакованных объектов:</string>
-      </property>
-     </widget>
-    </item>
-    <item row="4" column="1">
-     <widget class="QLabel" name="contObjVol">
-      <property name="text">
-       <string>- - -</string>
-      </property>
-     </widget>
-    </item>
-   </layout>
-  </widget>
-  <widget class="QPushButton" name="showObjListButton">
-   <property name="geometry">
-    <rect>
-     <x>510</x>
-     <y>570</y>
-     <width>371</width>
-     <height>32</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Показать список упакованных в контейнер объектов</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="saveResultButton">
-   <property name="geometry">
-    <rect>
-     <x>510</x>
-     <y>610</y>
-     <width>371</width>
-     <height>32</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Сохранить результаты упаковки</string>
-   </property>
-  </widget>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -383,7 +256,7 @@
     <item>
      <widget class="QLabel" name="label_10">
       <property name="text">
-       <string>Выберите заполненный контейнер для просмотра:</string>
+       <string>  Выберите заполненный контейнер для просмотра:</string>
       </property>
      </widget>
     </item>
@@ -396,7 +269,155 @@
     </item>
    </layout>
   </widget>
+  <widget class="QWidget" name="horizontalLayoutWidget_2">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>360</y>
+     <width>911</width>
+     <height>282</height>
+    </rect>
+   </property>
+   <layout class="QHBoxLayout" name="horizontalLayout_5">
+    <item>
+     <widget class="MainScene" name="pwidget" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>279</width>
+        <height>279</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>280</width>
+        <height>280</height>
+       </size>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <layout class="QGridLayout" name="gridLayout_2">
+        <item row="3" column="0">
+         <widget class="QLabel" name="label_14">
+          <property name="text">
+           <string>Количество упакованных объектов:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="1">
+         <widget class="QLabel" name="contObjVol">
+          <property name="text">
+           <string>- - -</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="0">
+         <widget class="QLabel" name="label_11">
+          <property name="text">
+           <string>Объём упакованных объектов:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLabel" name="contSize">
+          <property name="text">
+           <string>- - -</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_13">
+          <property name="text">
+           <string>Размеры контейнера:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="label_5">
+          <property name="text">
+           <string>Объём контейнера:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="1">
+         <widget class="QLabel" name="contOccup">
+          <property name="text">
+           <string>- - -</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QLabel" name="contVol">
+          <property name="text">
+           <string>- - -</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="QLabel" name="contObjCount">
+          <property name="text">
+           <string>- - -</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="0">
+         <widget class="QLabel" name="label_15">
+          <property name="text">
+           <string>Заполняемость контейнера:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_12">
+          <property name="text">
+           <string>Тип контейнера:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLabel" name="contType">
+          <property name="text">
+           <string>- - -</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QPushButton" name="showObjListButton">
+        <property name="text">
+         <string>Показать список упакованных в контейнер объектов</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="saveResultButton">
+        <property name="text">
+         <string>Сохранить результаты упаковки</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MainScene</class>
+   <extends>QWidget</extends>
+   <header>mainscene.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

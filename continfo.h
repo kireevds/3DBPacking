@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QString>
 #include <object.h>
+#include <container.h>
 
 namespace Ui {
 class ContInfo;
@@ -18,7 +19,9 @@ public:
     ~ContInfo();
 
 public slots:
-    void recieveData2(QList<Object*>* objL);
+//    void recieveData2(QList<Object*>* objL);
+    void recieveData2(Container* cont);
+
 
 private slots:
     void on_upButton_clicked();

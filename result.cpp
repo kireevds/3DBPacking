@@ -14,11 +14,13 @@ Result::Result(QWidget *parent) :
 
     fullContainers = new QList<Container*>;
     connect(ui->showObjListButton, SIGNAL(clicked()), contInformation, SLOT(show()));
-    connect(this, SIGNAL(sendData2(QList<Object*>*)), contInformation, SLOT(recieveData2(QList<Object*>*)));
+//    connect(this, SIGNAL(sendData2(QList<Object*>*)), contInformation, SLOT(recieveData2(QList<Object*>*)));
+    connect(this, SIGNAL(sendData2(Container*)), contInformation, SLOT(recieveData2(Container*)));
 }
 
 Result::~Result()
 {
+    ui->pwidget->~MainScene();
     ui->tableWidget->clear();
     delete fullContainers;
     delete ui;
@@ -345,13 +347,16 @@ void Result::on_comboBox_currentIndexChanged(int index)
     ui->contObjVol->setText(QString::number(objVol));
     float objVolF = (float)objVol / contVol;
     ui->contOccup->setText(generateOccupation(objVolF));
+
+    ui->pwidget->setParameters(fullContainers->at(index));
 }
 
 void Result::on_showObjListButton_clicked()
 {
     int i = ui->comboBox->currentIndex();
-    QList<Object*>* objList = fullContainers->at(i)->myobjects;
-    emit sendData2(objList);
+//    QList<Object*>* objList = fullContainers->at(i)->myobjects;
+//    emit sendData2(objList);
+    emit sendData2(fullContainers->at(i));
 }
 
 void Result::on_saveResultButton_clicked()

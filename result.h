@@ -26,7 +26,8 @@ public:
     ~Result();
 
 signals:
-    void sendData2(QList<Object*>* objL);
+//    void sendData2(QList<Object*>* objL);
+    void sendData2(Container*);
 
 
 public slots:
@@ -46,6 +47,7 @@ private slots:
     void on_showObjListButton_clicked();
 
     void on_saveResultButton_clicked();
+
 
 private:
     ContInfo* contInformation;

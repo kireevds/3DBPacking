@@ -14,10 +14,11 @@ ContInfo::~ContInfo()
     delete ui;
 }
 
-void ContInfo::recieveData2(QList<Object *> *objL)
+void ContInfo::recieveData2(Container *cont)
 {
+    ui->picWidget->setParameters(cont);
     ui->tableWidget->clear();
-    objects = objL;
+    objects = cont->myobjects;
     ui->tableWidget->setColumnCount(7);
     ui->tableWidget->setHorizontalHeaderLabels(QStringList() << "Тип" << "X" << "Y" << "Z" << "Ширина" << "Длина" << "Высота");
     ui->tableWidget->setRowCount(objects->size());
